@@ -21,6 +21,9 @@
 from sklearn.metrics import f1_score
 import sys
 import os
+
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+
 import time
 import importlib
 import numpy as np
