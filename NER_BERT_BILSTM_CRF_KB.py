@@ -491,7 +491,7 @@ turn_label_size = len(labelToIndex)
 
 
 print("***** Loading Turn Labels *****")
-print("  Num turn labels = %d" % len(turn_label_size))
+print("  Num turn labels = %d" % turn_label_size)
 
 # Load pre-trained model tokenizer (vocabulary)
 conllProcessor = CoNLLDataProcessor()
