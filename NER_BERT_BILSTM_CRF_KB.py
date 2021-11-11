@@ -914,9 +914,7 @@ def evaluate_turn_label(model, predict_dataloader, batch_size, epoch_th, dataset
     # spanp, spanr, spanf1 = spanf1_score(all_labels, [t if t > 2 else 3 for t in all_preds])
     # print("after span")
     end = time.time()
-    print(
-        'Epoch:%d, Acc:%.6f, Precision: %.6f, Recall_at_1: %.6f, Recall_at_2: %.6f, Recall_at_3: %.6f, F1: %.6f, Spend: %.3f minutes for evaluation on the set %s' \
-        % (epoch_th, 100. * test_acc, 100. * precision, 100. * recall_at_1, 100. * recall_at_2, 100. * recall_at_3, 100. * f1, (end - start) / 60.0), dataset_name)
+    print('Epoch:%d, Acc:%.6f, Precision: %.6f, Recall_at_1: %.6f, Recall_at_2: %.6f, Recall_at_3: %.6f, F1: %.6f, Spend: %.3f minutes for evaluation on the set %s' % (epoch_th, 100. * test_acc, 100. * precision, 100. * recall_at_1, 100. * recall_at_2, 100. * recall_at_3, 100. * f1, (end - start) / 60.0, dataset_name))
     print('--------------------------------------------------------------')
     return test_acc, f1
 
