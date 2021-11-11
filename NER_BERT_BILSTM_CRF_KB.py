@@ -898,11 +898,11 @@ def evaluate_turn_label(model, predict_dataloader, batch_size, epoch_th, dataset
             correct_at_3 = correct_at_3 + len([1 for p, t in zip(predicted_turn_labels, turn_labels) if t in p[:3]])
 
     # Adjusted
-    test_acc = correct_at_1 / total
-    precision = correct_at_1 / total
-    recall_at_1 = correct_at_1 / total
-    recall_at_2 = correct_at_2 / total
-    recall_at_3 = correct_at_3 / total
+    test_acc = float(correct_at_1) / float(total)
+    precision = float(correct_at_1) / float(total)
+    recall_at_1 = float(correct_at_1) / float(total)
+    recall_at_2 = float(correct_at_2) / float(total)
+    recall_at_3 = float(correct_at_3) / float(total)
     f1 = 2 * precision * recall_at_1 / (precision + recall_at_1)
     # micro = f1_score(all_labels, [t if t > 2 else 3 for t in all_preds], average="micro")
     # macro = f1_score(all_labels, [t if t > 2 else 3 for t in all_preds], average="macro")
