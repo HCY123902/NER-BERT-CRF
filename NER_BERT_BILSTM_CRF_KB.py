@@ -192,6 +192,7 @@ class DataProcessor(object):
                     elif len(pieces) == 1:
                         assert pieces[0] in labelToIndex
                         turn_label = labelToIndex[pieces[0]]
+                        continue
 
                     word = pieces[0]
                     # if word == "-DOCSTART-" or word == '':
