@@ -679,9 +679,9 @@ class BERT_BILSTM_CRF_KB_NER(nn.Module):
         else:
             # h_n: 4, batch_size, hidden_size
             _, (h_n, c_n) = self.rnn(new_seq_out)
-            rnn_seq_out = torch.sum(h_n, 0)
-            enc_feats = self.mlp_turn_classifier(rnn_seq_out)
-            return enc_feats
+            # batch, hidden_size
+            hidden = torch.sum(h_n, 0)
+            return hidden
 
     def _score_sentence(self, feats, label_ids):
         '''
