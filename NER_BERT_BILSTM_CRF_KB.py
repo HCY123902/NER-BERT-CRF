@@ -1032,7 +1032,8 @@ with torch.no_grad():
         # Adjusted
         input_ids, onto_labels, db_labels, input_mask, segment_ids, predict_mask, label_ids, turn_labels = batch
         if enable_turn_label_prediction == 0:
-            _, predicted_label_seq_ids = model(input_ids, segment_ids, input_mask)
+            # Adjusted
+            _, predicted_label_seq_ids = model(input_ids, onto_labels, db_labels, segment_ids, input_mask)
             # _, predicted = torch.max(out_scores, -1)
             valid_predicted = torch.masked_select(predicted_label_seq_ids, predict_mask)
             # valid_label_ids = torch.masked_select(label_ids, predict_mask)
