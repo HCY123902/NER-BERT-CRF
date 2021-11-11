@@ -43,6 +43,8 @@ import pickle
 from pytorch_pretrained_bert.optimization import BertAdam, warmup_linear
 from pytorch_pretrained_bert.tokenization import BertTokenizer
 
+import json
+
 print('Python version ', sys.version)
 print('PyTorch version ', torch.__version__)
 
@@ -86,6 +88,9 @@ do_lower_case = False
 # save_checkpoints_steps = 1000
 # "How many steps to make in each estimator call."
 # iterations_per_loop = 1000
+gradient = 0
+
+enable_turn_label_prediction = 1
 
 
 # %%
@@ -97,7 +102,7 @@ Functions and Classes for read and organize data set
 class InputExample(object):
     """A single training/test example for NER."""
 
-    def __init__(self, guid, words, onto_labels, db_labels, labels):
+    def __init__(self, guid, words, onto_labels, db_labels, labels, turn_label):
         """Constructs a InputExample.
 
         Args:
@@ -115,6 +120,8 @@ class InputExample(object):
         self.db_labels = db_labels
         # list of label sequence of the sentence,like: [B-ORG, O, B-MISC, O, O, O, B-MISC, O, O]
         self.labels = labels
+        # Added for turn label
+        self.turn_label = turn_label
 
 
 class InputFeatures(object):
@@ -123,7 +130,7 @@ class InputFeatures(object):
     """
 
     def __init__(self, guid, tokens, input_ids, onto_labels, db_labels, input_mask, segment_ids, predict_mask,
-                 label_ids):
+                 label_ids, turn_label):
         self.guid = guid,
         self.tokens = tokens,
         self.input_ids = input_ids
@@ -133,6 +140,9 @@ class InputFeatures(object):
         self.segment_ids = segment_ids
         self.predict_mask = predict_mask
         self.label_ids = label_ids
+
+        # Added for turn label
+        self.turn_label = turn_label
 
 
 class DataProcessor(object):
@@ -151,7 +161,7 @@ class DataProcessor(object):
         raise NotImplementedError()
 
     @classmethod
-    def _read_data(cls, input_file):
+    def _read_data(cls, input_file, labelToIndex):
         """
         Reads a BIO data.
         """
@@ -164,6 +174,7 @@ class DataProcessor(object):
                 labels = []
                 onto_labels = []
                 db_labels = []
+                turn_label = None
                 for line in entry.splitlines():
                     pieces = line.strip().split()
                     if len(pieces) < 1:
@@ -174,6 +185,10 @@ class DataProcessor(object):
                         db_labels.append(0)
                         labels.append('[SEP]')
                         continue
+                    # Added for turn labels
+                    elif len(pieces) == 1:
+                        assert pieces[0] in labelToIndex
+                        turn_label = labelToIndex[pieces[0]]
 
                     word = pieces[0]
                     # if word == "-DOCSTART-" or word == '':
@@ -183,7 +198,8 @@ class DataProcessor(object):
                     db_labels.append(int(pieces[2]))
                     labels.append(pieces[-1])
 
-                out_lists.append([words, onto_labels, db_labels, labels])
+                assert turn_label is not None
+                out_lists.append([words, onto_labels, db_labels, labels, turn_label])
         return out_lists
 
 
@@ -199,17 +215,30 @@ class CoNLLDataProcessor(DataProcessor):
         self._label_map = {label: i for i,
                                         label in enumerate(self._label_types)}
 
-    def get_train_examples(self, data_dir):
-        return self._create_examples(
-            self._read_data(os.path.join(data_dir, "train.txt")))
+    # Adjusted
+    # def get_train_examples(self, data_dir):
+    #     return self._create_examples(
+    #         self._read_data(os.path.join(data_dir, "train.txt")))
 
-    def get_dev_examples(self, data_dir):
-        return self._create_examples(
-            self._read_data(os.path.join(data_dir, "valid.txt")))
+    # def get_dev_examples(self, data_dir):
+    #     return self._create_examples(
+    #         self._read_data(os.path.join(data_dir, "valid.txt")))
 
-    def get_test_examples(self, data_dir):
+    # def get_test_examples(self, data_dir):
+    #     return self._create_examples(
+    #         self._read_data(os.path.join(data_dir, "test.txt")))
+
+    def get_train_examples(self, data_dir, labelToIndex):
         return self._create_examples(
-            self._read_data(os.path.join(data_dir, "test.txt")))
+            self._read_data(os.path.join(data_dir, "train.txt"), labelToIndex))
+
+    def get_dev_examples(self, data_dir, labelToIndex):
+        return self._create_examples(
+            self._read_data(os.path.join(data_dir, "valid.txt"), labelToIndex))
+
+    def get_test_examples(self, data_dir, labelToIndex):
+        return self._create_examples(
+            self._read_data(os.path.join(data_dir, "test.txt"), labelToIndex))
 
     def get_labels(self):
         return self._label_types
@@ -233,9 +262,11 @@ class CoNLLDataProcessor(DataProcessor):
             words = one_lists[0]
             onto_labels = one_lists[1]
             db_labels = one_lists[2]
-            labels = one_lists[-1]
+            # Adjusted
+            labels = one_lists[-2]
+            turn_label = one_lists[-1]
             examples.append(InputExample(
-                guid=guid, words=words, onto_labels=onto_labels, db_labels=db_labels, labels=labels))
+                guid=guid, words=words, onto_labels=onto_labels, db_labels=db_labels, labels=labels, turn_label=turn_label))
         return examples
 
     def _create_examples2(self, lines):
@@ -243,7 +274,9 @@ class CoNLLDataProcessor(DataProcessor):
         for (i, line) in enumerate(lines):
             guid = i
             text = line[0]
-            ner_label = line[-1]
+            # Adjusted
+            ner_label = line[-2]
+            turn_label = line[-1]
             examples.append(InputExample(
                 guid=guid, text_a=text, labels_a=ner_label))
         return examples
@@ -306,6 +339,7 @@ def example2feature(example, tokenizer, label_map, max_seq_length):
     segment_ids = [0] * len(input_ids)
     input_mask = [1] * len(input_ids)
 
+    # Adjusted
     feat = InputFeatures(
         guid=example.guid,
         tokens=tokens,
@@ -315,7 +349,8 @@ def example2feature(example, tokenizer, label_map, max_seq_length):
         input_mask=input_mask,
         segment_ids=segment_ids,
         predict_mask=predict_mask,
-        label_ids=label_ids)
+        label_ids=label_ids,
+        turn_label=example.turn_label)
 
     return feat
 
@@ -332,7 +367,9 @@ class NerDataset(data.Dataset):
 
     def __getitem__(self, idx):
         feat = example2feature(self.examples[idx], self.tokenizer, self.label_map, max_seq_length)
-        return feat.input_ids, feat.onto_labels, feat.db_labels, feat.input_mask, feat.segment_ids, feat.predict_mask, feat.label_ids
+
+        # Adjusted
+        return feat.input_ids, feat.onto_labels, feat.db_labels, feat.input_mask, feat.segment_ids, feat.predict_mask, feat.label_ids, feat.turn_label
 
     @classmethod
     def pad(cls, batch):
@@ -348,7 +385,11 @@ class NerDataset(data.Dataset):
         predict_mask_list = torch.ByteTensor(f(5, maxlen))
         label_ids_list = torch.LongTensor(f(6, maxlen))
 
-        return input_ids_list, onto_labels_list, db_labels_list, input_mask_list, segment_ids_list, predict_mask_list, label_ids_list
+        # Added for turn label
+        turn_labels = [sample[7] for sample in batch]
+        turn_labels = torch.LongTensor(turn_labels)
+
+        return input_ids_list, onto_labels_list, db_labels_list, input_mask_list, segment_ids_list, predict_mask_list, label_ids_list, turn_labels
 
 
 def _f1_score(y_true, y_pred):
@@ -439,13 +480,29 @@ torch.manual_seed(44)
 if cuda_yes:
     torch.cuda.manual_seed_all(44)
 
+with open("./turn_label.json", "r", encoding="utf-8") as t:
+    turn_label_map = json.load(t)
+
+labelToIndex = turn_label_map["labelToIndex"]
+turn_label_size = len(labelToIndex)
+
+
+print("***** Loading Turn Labels *****")
+print("  Num turn labels = %d" % len(turn_label_size))
+
 # Load pre-trained model tokenizer (vocabulary)
 conllProcessor = CoNLLDataProcessor()
 label_list = conllProcessor.get_labels()
 label_map = conllProcessor.get_label_map()
-train_examples = conllProcessor.get_train_examples(data_dir)
-dev_examples = conllProcessor.get_dev_examples(data_dir)
-test_examples = conllProcessor.get_test_examples(data_dir)
+
+# Adjusted
+# train_examples = conllProcessor.get_train_examples(data_dir)
+# dev_examples = conllProcessor.get_dev_examples(data_dir)
+# test_examples = conllProcessor.get_test_examples(data_dir)
+train_examples = conllProcessor.get_train_examples(data_dir, labelToIndex)
+dev_examples = conllProcessor.get_dev_examples(data_dir, labelToIndex)
+test_examples = conllProcessor.get_test_examples(data_dir, labelToIndex)
+
 
 total_train_steps = int(len(train_examples) / batch_size / gradient_accumulation_steps * total_train_epochs)
 
@@ -504,7 +561,7 @@ def log_sum_exp_batch(log_Tensor, axis=-1):  # shape (batch_size,n,m)
 
 class BERT_BILSTM_CRF_KB_NER(nn.Module):
 
-    def __init__(self, bert_model, start_label_id, stop_label_id, num_labels, max_seq_length, batch_size, device):
+    def __init__(self, bert_model, start_label_id, stop_label_id, num_labels, max_seq_length, batch_size, device, turn_label_size, gradient=0):
         super(BERT_BILSTM_CRF_KB_NER, self).__init__()
         self.hidden_size = 768
         self.start_label_id = start_label_id
@@ -516,6 +573,13 @@ class BERT_BILSTM_CRF_KB_NER(nn.Module):
 
         # use pretrainded BertModel
         self.bert = bert_model
+
+        # Added
+        if gradient != 1:
+            for name, param in self.bert.named_parameters():
+                if 'classifier' not in name: # classifier layer
+                    param.requires_grad = False
+
         self.dropout = torch.nn.Dropout(0.2)
 
         self.onto_embed = torch.nn.Embedding(2, 5)
@@ -538,6 +602,23 @@ class BERT_BILSTM_CRF_KB_NER(nn.Module):
         nn.init.xavier_uniform_(self.hidden2label.weight)
         nn.init.constant_(self.hidden2label.bias, 0.0)
         # self.apply(self.init_bert_weights)
+
+        # Added
+        
+        self.mlp_turn_classifier = nn.Sequential(
+                # batch_size, max_contiext_len, max_context_len, hidden_size * 4 -> batch_size, max_context_len, max_context_len, hidden_size
+                nn.Linear(778 // 2, turn_label_size),
+                nn.BatchNorm1d(turn_label_size, eps=1e-05, momentum=0.1),
+                nn.ReLU(),
+                nn.Linear(turn_label_size, turn_label_size),
+                nn.BatchNorm1d(turn_label_size, eps=1e-05, momentum=0.1),
+                nn.ReLU(),
+                # batch_size, max_context_len, max_context_len, hidden_size -> batch_size, max_context_len, max_context_len, 1
+                nn.Linear(turn_label_size, turn_label_size),
+            )
+
+        self.criterion = nn.CrossEntropyLoss()
+        
 
     def init_bert_weights(self, module):
         """ Initialize the weights.
@@ -661,17 +742,31 @@ class BERT_BILSTM_CRF_KB_NER(nn.Module):
         # Get the emission scores from the BiLSTM
         bert_feats = self._get_bert_features(input_ids, onto_labels, db_labels, segment_ids, input_mask)
 
-        # Find the best path, given the features.
-        score, label_seq_ids = self._viterbi_decode(bert_feats)
-        return score, label_seq_ids
+        if enable_turn_label_prediction == 0:
+            # Find the best path, given the features.
+            score, label_seq_ids = self._viterbi_decode(bert_feats)
+            return score, label_seq_ids
+        else:
+            turn_label_prediction = self.mlp_turn_classifier(bert_feats)
+            _, turn_labels = torch.topk(turn_label_prediction, 3, dim=1)
+            return turn_labels
 
+
+    # Added for turn label prediction
+    def cross_entropy_loss(self, input_ids, onto_labels, db_labels, segment_ids, input_mask, turn_label_target):
+        bert_feats = self._get_bert_features(input_ids, onto_labels, db_labels, segment_ids, input_mask)
+
+        # batch_size, turn_label_size
+        turn_label_prediction = self.mlp_turn_classifier(bert_feats)
+
+        return self.criterion(turn_label_prediction, turn_label_target)
 
 start_label_id = conllProcessor.get_start_label_id()
 stop_label_id = conllProcessor.get_stop_label_id()
 
 bert_model = BertModel.from_pretrained(bert_model_scale)
 model = BERT_BILSTM_CRF_KB_NER(bert_model, start_label_id, stop_label_id, len(label_list), max_seq_length, batch_size,
-                               device)
+                               device, turn_label_size, gradient=gradient)
 
 # %%
 if load_checkpoint and os.path.exists(output_dir + '/ner_bert_bilstm_crf_kb_checkpoint.pt'):
@@ -731,7 +826,7 @@ def evaluate(model, predict_dataloader, batch_size, epoch_th, dataset_name):
     with torch.no_grad():
         for batch in predict_dataloader:
             batch = tuple(t.to(device) for t in batch)
-            input_ids, onto_labels, db_labels, input_mask, segment_ids, predict_mask, label_ids = batch
+            input_ids, onto_labels, db_labels, input_mask, segment_ids, predict_mask, label_ids, turn_labels = batch
             _, predicted_label_seq_ids = model(input_ids, onto_labels, db_labels, segment_ids, input_mask)
             # _, predicted = torch.max(out_scores, -1)
             valid_predicted = torch.masked_select(predicted_label_seq_ids, predict_mask)
@@ -757,6 +852,59 @@ def evaluate(model, predict_dataloader, batch_size, epoch_th, dataset_name):
     print('--------------------------------------------------------------')
     return test_acc, f1
 
+def evaluate_turn_label(model, predict_dataloader, batch_size, epoch_th, dataset_name):
+    # print("***** Running prediction *****")
+    model.eval()
+    all_preds = []
+    all_turn_labels = []
+    total = 0
+    # Adjusted
+    # correct = 0
+    correct_at_1 = 0
+    correct_at_2 = 0
+    correct_at_3 = 0
+
+    start = time.time()
+    with torch.no_grad():
+        for batch in predict_dataloader:
+            batch = tuple(t.to(device) for t in batch)
+            input_ids, onto_labels, db_labels, input_mask, segment_ids, predict_mask, label_ids, turn_labels = batch
+            predicted_turn_labels = model(input_ids, onto_labels, db_labels, segment_ids, input_mask)
+            # _, predicted = torch.max(out_scores, -1)
+            # valid_predicted = torch.masked_select(predicted_label_seq_ids, predict_mask)
+            # valid_label_ids = torch.masked_select(label_ids, predict_mask)
+            predicted_turn_labels = predicted_turn_labels.tolist()
+            turn_labels = turn_labels.tolist()
+
+            all_preds.extend(predicted_turn_labels)
+            all_turn_labels.extend(turn_labels)
+            # print(len(valid_label_ids),len(valid_predicted),len(valid_label_ids)==len(valid_predicted))
+            total += len(turn_labels)
+            # correct += valid_predicted.eq().sum().item()
+            correct_at_1 = correct_at_1 + [1 for p, t in zip(predicted_turn_labels, turn_labels) if p[0] == t]
+            correct_at_2 = correct_at_2 + [1 for p, t in zip(predicted_turn_labels, turn_labels) if t in p[:2]]
+            correct_at_3 = correct_at_3 + [1 for p, t in zip(predicted_turn_labels, turn_labels) if t in p[:3]]
+
+    # Adjusted
+    test_acc = correct_at_1 / total
+    precision = correct_at_1 / total
+    recall_at_1 = correct_at_1 / total
+    recall_at_2 = correct_at_2 / total
+    recall_at_3 = correct_at_3 / total
+    f1 = 2 * precision * recall_at_1 / (precision + recall_at_1)
+    # micro = f1_score(all_labels, [t if t > 2 else 3 for t in all_preds], average="micro")
+    # macro = f1_score(all_labels, [t if t > 2 else 3 for t in all_preds], average="macro")
+    # print("before span")
+    # spanp, spanr, spanf1 = spanf1_score(all_labels, [t if t > 2 else 3 for t in all_preds])
+    # print("after span")
+    end = time.time()
+    print(
+        'Epoch:%d, Acc:%.6f, Precision: %.6f, Recall_at_1: %.6f, Recall_at_2: %.6f, Recall_at_3: %.6f, F1: %.6f, Spend: %.3f minutes for evaluation on the set %s' \
+        % (epoch_th, 100. * test_acc, 100. * precision, 100. * recall_at_1, 100. * recall_at_2, 100. * recall_at_3, 100. * f1, (end - start) / 60.0), dataset_name)
+    print('--------------------------------------------------------------')
+    return test_acc, f1
+
+
 
 # %%
 # train procedure
@@ -773,17 +921,27 @@ for epoch in range(start_epoch, total_train_epochs):
     step = 0
     for batch in tqdm(train_dataloader):
         batch = tuple(t.to(device) for t in batch)
-        input_ids, onto_labels, db_labels, input_mask, segment_ids, predict_mask, label_ids = batch
 
-        neg_log_likelihood = model.neg_log_likelihood(input_ids, onto_labels, db_labels, segment_ids, input_mask,
-                                                      label_ids)
+        # Adjusted
+        input_ids, onto_labels, db_labels, input_mask, segment_ids, predict_mask, label_ids, turn_labels = batch
 
-        if gradient_accumulation_steps > 1:
-            neg_log_likelihood = neg_log_likelihood / gradient_accumulation_steps
+        # Adjusted
+        if enable_turn_label_prediction == 0:
+            neg_log_likelihood = model.neg_log_likelihood(input_ids, onto_labels, db_labels, segment_ids, input_mask,
+                                                        label_ids)
 
-        neg_log_likelihood.backward()
+            if gradient_accumulation_steps > 1:
+                neg_log_likelihood = neg_log_likelihood / gradient_accumulation_steps
+            neg_log_likelihood.backward()
+            tr_loss += neg_log_likelihood.item()
+        else:
+            cross_entropy_loss = model.cross_entropy_loss(input_ids, onto_labels, db_labels, segment_ids, input_mask,
+                                                        turn_labels)
 
-        tr_loss += neg_log_likelihood.item()
+            if gradient_accumulation_steps > 1:
+                cross_entropy_loss = cross_entropy_loss / gradient_accumulation_steps
+            cross_entropy_loss.backward()
+            tr_loss += cross_entropy_loss.item()
 
         if (step + 1) % gradient_accumulation_steps == 0:
             # modify learning rate with special warm up BERT uses
@@ -801,17 +959,25 @@ for epoch in range(start_epoch, total_train_epochs):
     print('--------------------------------------------------------------')
     print("Epoch:{} completed, Total training's Loss: {}, Spend: {}m".format(epoch, tr_loss,
                                                                              (time.time() - train_start) / 60.0))
-    valid_acc, valid_f1 = evaluate(model, dev_dataloader, batch_size, epoch, 'Valid_set')
+
+    if enable_turn_label_prediction == 0:
+        valid_acc, valid_f1 = evaluate(model, dev_dataloader, batch_size, epoch, 'Valid_set')
+    else:
+        valid_acc, valid_f1 = evaluate_turn_label(model, dev_dataloader, batch_size, epoch, 'Valid_set')
 
     # Save a checkpoint
     if valid_f1 > valid_f1_prev:
         # model_to_save = model.module if hasattr(model, 'module') else model  # Only save the model it-self
+        # Adjusted
         torch.save({'epoch': epoch, 'model_state': model.state_dict(), 'valid_acc': valid_acc,
                     'valid_f1': valid_f1, 'max_seq_length': max_seq_length, 'lower_case': do_lower_case},
-                   os.path.join(output_dir, 'ner_bert_bilstm_crf_kb_checkpoint.pt'))
+                   os.path.join(output_dir, 'ner_bert_bilstm_crf_kb_turn_prediction_checkpoint.pt'))
         valid_f1_prev = valid_f1
 
-evaluate(model, test_dataloader, batch_size, total_train_epochs - 1, 'Test_set')
+if enable_turn_label_prediction == 0:
+    evaluate(model, test_dataloader, batch_size, total_train_epochs - 1, 'Test_set')
+else:
+    evaluate_turn_label(model, test_dataloader, batch_size, total_train_epochs - 1, 'Test_set')
 
 # %%
 '''
@@ -831,7 +997,10 @@ print('Loaded the pretrain  NER_BERT_BILSTM_CRF_KB  model, epoch:', checkpoint['
 
 model.to(device)
 # evaluate(model, train_dataloader, batch_size, total_train_epochs-1, 'Train_set')
-evaluate(model, test_dataloader, batch_size, epoch, 'Test_set')
+if enable_turn_label_prediction == 0:
+    evaluate(model, test_dataloader, batch_size, epoch, 'Test_set')
+else:
+    evaluate_turn_label(model, test_dataloader, batch_size, epoch, 'Test_set')
 # print('Total spend:',(time.time()-train_start)/60.0)
 
 
@@ -845,20 +1014,27 @@ with torch.no_grad():
                                        collate_fn=NerDataset.pad)
     for batch in demon_dataloader:
         batch = tuple(t.to(device) for t in batch)
-        input_ids, onto_labels, db_labels, input_mask, segment_ids, predict_mask, label_ids = batch
-        _, predicted_label_seq_ids = model(input_ids, segment_ids, input_mask)
-        # _, predicted = torch.max(out_scores, -1)
-        valid_predicted = torch.masked_select(predicted_label_seq_ids, predict_mask)
-        # valid_label_ids = torch.masked_select(label_ids, predict_mask)
-        for i in range(10):
-            print(predicted_label_seq_ids[i])
-            print(label_ids[i])
-            new_ids = predicted_label_seq_ids[i].cpu().numpy()[predict_mask[i].cpu().numpy() == 1]
-            print(list(map(lambda i: label_list[i], new_ids)))
-            # print(test_examples[i].labels)
-            old_ids = label_ids[i].cpu().numpy()[predict_mask[i].cpu().numpy() == 1]
-            print(list(map(lambda i: label_list[i], old_ids)))
-        break
+
+        # Adjusted
+        input_ids, onto_labels, db_labels, input_mask, segment_ids, predict_mask, label_ids, turn_labels = batch
+        if enable_turn_label_prediction == 0:
+            _, predicted_label_seq_ids = model(input_ids, segment_ids, input_mask)
+            # _, predicted = torch.max(out_scores, -1)
+            valid_predicted = torch.masked_select(predicted_label_seq_ids, predict_mask)
+            # valid_label_ids = torch.masked_select(label_ids, predict_mask)
+            for i in range(10):
+                print(predicted_label_seq_ids[i])
+                print(label_ids[i])
+                new_ids = predicted_label_seq_ids[i].cpu().numpy()[predict_mask[i].cpu().numpy() == 1]
+                print(list(map(lambda i: label_list[i], new_ids)))
+                # print(test_examples[i].labels)
+                old_ids = label_ids[i].cpu().numpy()[predict_mask[i].cpu().numpy() == 1]
+                print(list(map(lambda i: label_list[i], old_ids)))
+            break
+        else:
+            predicted_labels = model(input_ids, segment_ids, input_mask)
+            print("true labels: ", turn_labels)
+            print("predicted labels", predicted_labels[:, 0])
 # %%
 print(conllProcessor.get_label_map())
 # print(test_examples[8].words)
