@@ -893,9 +893,9 @@ def evaluate_turn_label(model, predict_dataloader, batch_size, epoch_th, dataset
             # print(len(valid_label_ids),len(valid_predicted),len(valid_label_ids)==len(valid_predicted))
             total += len(turn_labels)
             # correct += valid_predicted.eq().sum().item()
-            correct_at_1 = correct_at_1 + [1 for p, t in zip(predicted_turn_labels, turn_labels) if p[0] == t]
-            correct_at_2 = correct_at_2 + [1 for p, t in zip(predicted_turn_labels, turn_labels) if t in p[:2]]
-            correct_at_3 = correct_at_3 + [1 for p, t in zip(predicted_turn_labels, turn_labels) if t in p[:3]]
+            correct_at_1 = correct_at_1 + len([1 for p, t in zip(predicted_turn_labels, turn_labels) if p[0] == t])
+            correct_at_2 = correct_at_2 + len([1 for p, t in zip(predicted_turn_labels, turn_labels) if t in p[:2]])
+            correct_at_3 = correct_at_3 + len([1 for p, t in zip(predicted_turn_labels, turn_labels) if t in p[:3]])
 
     # Adjusted
     test_acc = correct_at_1 / total
