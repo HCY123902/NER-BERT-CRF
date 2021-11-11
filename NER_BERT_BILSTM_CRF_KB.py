@@ -903,7 +903,11 @@ def evaluate_turn_label(model, predict_dataloader, batch_size, epoch_th, dataset
     recall_at_1 = float(correct_at_1) / float(total)
     recall_at_2 = float(correct_at_2) / float(total)
     recall_at_3 = float(correct_at_3) / float(total)
-    f1 = 2 * precision * recall_at_1 / (precision + recall_at_1)
+    try:
+        f1 = 2 * precision * recall_at_1 / (precision + recall_at_1)
+    except ZeroDivisionError:
+        f1 = 1.0
+    
     # micro = f1_score(all_labels, [t if t > 2 else 3 for t in all_preds], average="micro")
     # macro = f1_score(all_labels, [t if t > 2 else 3 for t in all_preds], average="macro")
     # print("before span")
