@@ -135,12 +135,12 @@ if __name__ == '__main__':
 
 
     # Added
+    classifier_model_path = os.path.join('checkpoint', 'classifier')
     classifier_model_exact_path = os.path.join('checkpoint/classifier') + "/NER_BERT_BILSTM_CRF_KB_CLASSIFIER_0.pt"
     if os.path.exists(classifier_model_exact_path):
         pass
     else:
         print("Original classifier model is not present. Train the new model")
-        classifier_model_path = os.path.join('checkpoint', 'classifier')
         classifier_stra = Strategy(args, tagging_model, labeled_data, unlabeled_data,label_map, classifier, labelToIndex=labelToIndex)
         classifier_valid_acc_prev, classifier_valid_f1_prev = classifier_stra.train_classifier(-1, len(all_train_examples), classifier_train_dataloader, dev_dataloader, 0, 0, 0, model_path=classifier_model_path, number_of_epochs=50)
         print('time cost: ', (time.time()-start)/3600) 
