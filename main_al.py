@@ -243,6 +243,7 @@ if __name__ == '__main__':
 
         print('--------------------ind_iter: ', ind_iter)
         samp_select = sampler.query(select_size, classifier_labeled_dataloader, classifier_unlabeled_dataloader)
+        assert len(samp_select) > 0.5 * select_size
         samp_select_final = samp_select
         print('coarse sampling filter size now: ', len(samp_select))
 
