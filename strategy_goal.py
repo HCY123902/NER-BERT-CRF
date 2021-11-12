@@ -27,7 +27,7 @@ from collections import Counter
 
 class Strategy(object):
 
-    def __init__(self, args, current_model, labeled_data, unlabeled_data, label_map, classifier):
+    def __init__(self, args, current_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex={}):
         """
         current_model:
             for training, it is the init model for training
@@ -43,7 +43,7 @@ class Strategy(object):
         self.do_lower_case = False
         self.tokenizer = BertTokenizer.from_pretrained(self.args.pretrained_model, do_lower_case=self.do_lower_case)
         self.label_map = label_map
-        self.conllProcessor = CoNLLDataProcessor()
+        self.conllProcessor = CoNLLDataProcessor(labelToIndex)
 
         # Added
         self.classifier_learning_rate0 = 3e-4
@@ -526,8 +526,8 @@ class Strategy(object):
             return selected_data[:n]
 
 class RandomSampling(Strategy):  ## return selected samples (n pieces) for current iteration
-    def __init__(self, args, current_model, labeled_data, unlabeled_data, label_map, classifier):
-        super().__init__(args, current_model, labeled_data, unlabeled_data, label_map, classifier)
+    def __init__(self, args, current_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex={}):
+        super().__init__(args, current_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex=labelToIndex)
 
     def query(self, n, labeled_loader, unlabeled_loader):
         # return random.sample(self.unlabeled_data, n)
@@ -564,8 +564,8 @@ class RandomSampling(Strategy):  ## return selected samples (n pieces) for curre
 
 class MarginSampling(Strategy):
 
-    def __init__(self, args, current_model, labeled_data, unlabeled_data, label_map, classifier):
-        super().__init__(args, current_model, labeled_data, unlabeled_data, label_map, classifier)
+    def __init__(self, args, current_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex={}):
+        super().__init__(args, current_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex=labelToIndex)
 
     def query(self, n, labeled_loader, unlabeled_loader):
         probs, masks = self.predict_prob()
@@ -599,8 +599,8 @@ class MarginSampling(Strategy):
 
 class EntropySampling(Strategy):
 
-    def __init__(self, args, current_model, labeled_data, unlabeled_data, label_map, classifier):
-        super().__init__(args, current_model, labeled_data, unlabeled_data, label_map, classifier)
+    def __init__(self, args, current_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex={}):
+        super().__init__(args, current_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex=labelToIndex)
 
     def query(self, n, labeled_loader, unlabeled_loader):
         probs, masks = self.predict_prob()
@@ -638,8 +638,8 @@ class EntropySampling(Strategy):
 
 
 class BALDDropout2(Strategy):
-    def __init__(self, args, current_model, labeled_data, unlabeled_data, label_map):
-        super().__init__(args, current_model, labeled_data, unlabeled_data, label_map)
+    def __init__(self, args, current_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex={}):
+        super().__init__(args, current_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex=labelToIndex)
         self.n_trail = 2
 
     def query(self, n, labeled_loader, unlabeled_loader):
@@ -681,8 +681,8 @@ class BALDDropout2(Strategy):
 
 
 class BALDDropout(Strategy):
-    def __init__(self, args, current_model, labeled_data, unlabeled_data, label_map):
-        super().__init__(args, current_model, labeled_data, unlabeled_data, label_map)
+    def __init__(self, args, current_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex={}):
+        super().__init__(args, current_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex=labelToIndex)
         self.n_trail = 5
 
     def query(self, n, labeled_loader, unlabeled_loader):

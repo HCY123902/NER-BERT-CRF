@@ -128,7 +128,7 @@ if __name__ == '__main__':
     if os.path.exists(model_exact_path):
         pass
     else:
-        stra = Strategy(args, tagging_model, labeled_data, unlabeled_data,label_map, classifier)
+        stra = Strategy(args, tagging_model, labeled_data, unlabeled_data,label_map, classifier, labelToIndex=labelToIndex)
         valid_acc_prev, valid_f1_prev = stra.train( -1, run_name, len(labeled_dataset), train_dataloader, dev_dataloader, test_dataloader, 0, 0, 0, model_path=model_path)
         print('time cost: ', (time.time()-start)/3600) 
     log.flush()
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     else:
         print("Original classifier model is not present. Train the new model")
         classifier_model_path = os.path.join('checkpoint', 'classifier')
-        classifier_stra = Strategy(args, tagging_model, labeled_data, unlabeled_data,label_map, classifier)
+        classifier_stra = Strategy(args, tagging_model, labeled_data, unlabeled_data,label_map, classifier, labelToIndex=labelToIndex)
         classifier_valid_acc_prev, classifier_valid_f1_prev = classifier_stra.train_classifier(-1, len(all_train_examples), classifier_train_dataloader, dev_dataloader, 0, 0, 0, model_path=classifier_model_path, number_of_epochs=50)
         print('time cost: ', (time.time()-start)/3600) 
     log.flush()
@@ -198,15 +198,15 @@ if __name__ == '__main__':
  
     # 2.1. selecting samples by the AL strategy
     if method_name == 'entropy':
-        sampler = EntropySampling(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier)
+        sampler = EntropySampling(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex=labelToIndex)
     if method_name == 'margin':
-        sampler = MarginSampling(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier)
+        sampler = MarginSampling(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex=labelToIndex)
     if method_name == 'bald':
-        sampler = BALDDropout(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier)
+        sampler = BALDDropout(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex=labelToIndex)
     if method_name == 'bald2':
-        sampler = BALDDropout2(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier)
+        sampler = BALDDropout2(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex=labelToIndex)
     if method_name == 'random':
-        sampler = RandomSampling(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier)
+        sampler = RandomSampling(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex=labelToIndex)
     print('----------------coarse samp_select------------ ')
     log.flush()
 
