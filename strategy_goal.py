@@ -19,7 +19,7 @@ from pytorch_pretrained_bert.tokenization import BertTokenizer
 # from data import DialogueDataset
 from tqdm import tqdm
 import time
-import transformers
+# import transformers
 import os
 from utils import *
 import operator
