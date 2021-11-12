@@ -3,6 +3,10 @@
 This section of code is partly based on ej0cl6/deep-active-learning 
 and dsgissin/DiscriminativeActiveLearning from github.
 '''
+import os
+
+os.environ['CUDA_VISIBLE_DEVICES'] = '6'
+
 import argparse
 from re import S
 from classifier import BERT_BILSTM_CRF_KB_NER_CLASSIFIER
@@ -11,7 +15,7 @@ import torch
 from scipy.spatial import distance_matrix
 import json
 import random
-import os
+
 from strategy_goal import *
 import time
 from copy import deepcopy
