@@ -1047,7 +1047,7 @@ with torch.no_grad():
                 print(list(map(lambda i: label_list[i], old_ids)))
             break
         else:
-            predicted_labels = model(input_ids, segment_ids, input_mask)
+            predicted_labels = model(input_ids, onto_labels, db_labels, segment_ids, input_mask)
             print("true labels: ", turn_labels)
             print("predicted labels", predicted_labels[:, 0])
 # %%
