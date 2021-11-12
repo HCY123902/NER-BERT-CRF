@@ -175,7 +175,7 @@ if __name__ == '__main__':
         classifier_valid_acc_prev = classifier_checkpoint['valid_acc']
         classifier_valid_f1_prev = classifier_checkpoint['valid_f1']
         classifier_pretrained_dict = classifier_checkpoint['model_state']
-        classifier_net_state_dict = tagging_model.state_dict()
+        classifier_net_state_dict = classifier.state_dict()
         classifier_pretrained_dict_selected = {k: v for k, v in classifier_pretrained_dict.items() if k in classifier_net_state_dict}
         classifier_net_state_dict.update(classifier_pretrained_dict_selected)
         classifier.load_state_dict(classifier_net_state_dict)
