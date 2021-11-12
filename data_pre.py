@@ -42,7 +42,7 @@ class InputFeatures(object):
     """
 
     def __init__(self, guid, tokens, input_ids, onto_labels, db_labels, input_mask, segment_ids, predict_mask,
-                 label_ids):
+                 label_ids, turn_label):
         self.guid = guid,
         self.tokens = tokens,
         self.input_ids = input_ids
@@ -52,6 +52,9 @@ class InputFeatures(object):
         self.segment_ids = segment_ids
         self.predict_mask = predict_mask
         self.label_ids = label_ids
+        
+        # Added for turn label
+        self.turn_label = turn_label
 
 
 class DataProcessor(object):
