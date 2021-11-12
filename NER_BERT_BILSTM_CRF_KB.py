@@ -70,13 +70,13 @@ do_predict = True
 load_checkpoint = True
 # "The vocabulary file that the BERT model was trained on."
 max_seq_length = 256
-batch_size = 32  # 32
+batch_size = 256  # 32
 # "The initial learning rate for Adam."
-learning_rate0 = 3e-5
+learning_rate0 = 3e-4
 lr0_crf_fc = 8e-5
-weight_decay_finetune = 1e-5  # 0.01
+weight_decay_finetune = 3e-4  # 0.01
 weight_decay_crf_fc = 5e-6  # 0.005
-total_train_epochs = 10
+total_train_epochs = 100
 gradient_accumulation_steps = 1
 warmup_proportion = 0.1
 output_dir = './output/'
