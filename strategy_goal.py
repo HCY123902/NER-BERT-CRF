@@ -321,8 +321,8 @@ class Strategy(object):
     def evaluate_turn_label(self, predict_dataloader, batch_size, epoch_th, dataset_name):
         # print("***** Running prediction *****")
         self.classifier.eval()
-        all_preds = []
-        all_turn_labels = []
+        # all_preds = []
+        # all_turn_labels = []
         total = 0
         # Adjusted
         # correct = 0
@@ -342,8 +342,8 @@ class Strategy(object):
                 predicted_turn_labels = predicted_turn_labels.tolist()
                 turn_labels = turn_labels.tolist()
 
-                all_preds.extend(predicted_turn_labels)
-                all_turn_labels.extend(turn_labels)
+                # all_preds.extend(predicted_turn_labels)
+                # all_turn_labels.extend(turn_labels)
                 # print(len(valid_label_ids),len(valid_predicted),len(valid_label_ids)==len(valid_predicted))
                 total += len(turn_labels)
                 # correct += valid_predicted.eq().sum().item()
@@ -468,7 +468,7 @@ class Strategy(object):
                 # _, predicted = torch.max(out_scores, -1)
                 # valid_predicted = torch.masked_select(predicted_label_seq_ids, predict_mask)
                 # valid_label_ids = torch.masked_select(label_ids, predict_mask)
-                predicted_turn_labels = predicted_turn_labels.tolist()
+                predicted_turn_labels = predicted_turn_labels[:, 0].tolist()
 
                 labeled_prediction.extend(predicted_turn_labels)
             
@@ -479,7 +479,7 @@ class Strategy(object):
                 # _, predicted = torch.max(out_scores, -1)
                 # valid_predicted = torch.masked_select(predicted_label_seq_ids, predict_mask)
                 # valid_label_ids = torch.masked_select(label_ids, predict_mask)
-                predicted_turn_labels = predicted_turn_labels.tolist()
+                predicted_turn_labels = predicted_turn_labels[:, 0].tolist()
 
                 unlabeled_prediction.extend(predicted_turn_labels)
 
