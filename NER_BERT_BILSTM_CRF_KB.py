@@ -980,12 +980,13 @@ for epoch in range(start_epoch, total_train_epochs):
         valid_acc, valid_f1 = evaluate_turn_label(model, dev_dataloader, batch_size, epoch, 'Valid_set')
 
     # Save a checkpoint
-    if valid_f1 > valid_f1_prev:
+    if valid_f1 > valid_f1_prev and epoch % 5 == 0:
         # model_to_save = model.module if hasattr(model, 'module') else model  # Only save the model it-self
         # Adjusted
+        print("Saving model for the current epoch")
         torch.save({'epoch': epoch, 'model_state': model.state_dict(), 'valid_acc': valid_acc,
                     'valid_f1': valid_f1, 'max_seq_length': max_seq_length, 'lower_case': do_lower_case},
-                   os.path.join(output_dir, 'ner_bert_bilstm_crf_kb_turn_prediction_checkpoint.pt'))
+                   os.path.join(output_dir, 'ner_bert_bilstm_crf_kb_turn_prediction_checkpoint_{}.pt'.format(epoch)))
         valid_f1_prev = valid_f1
 
 if enable_turn_label_prediction == 0:
