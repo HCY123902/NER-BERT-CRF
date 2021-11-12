@@ -102,7 +102,7 @@ class BERT_BILSTM_CRF_KB_NER(nn.Module):
         bert_seq_out, _ = self.bert(input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
                                     output_all_encoded_layers=False)
 
-        new_seq_out = torch.concat((bert_seq_out, self.onto_embed(onto_labels), self.db_embed(db_labels)), 2)
+        new_seq_out = torch.cat((bert_seq_out, self.onto_embed(onto_labels), self.db_embed(db_labels)), 2)
         new_seq_out = self.dropout(new_seq_out)
 
         rnn_seq_out, _ = self.rnn(new_seq_out)
