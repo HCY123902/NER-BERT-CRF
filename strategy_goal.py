@@ -537,15 +537,18 @@ class RandomSampling(Strategy):  ## return selected samples (n pieces) for curre
         if len(unlabeled_prediction) <= n:
             return self.unlabeled_data[:n]
 
-        class_number = len(labeled_map) + len(unlabeled_map)
+        combined_map = {}
+        combined_map.update{labeled_map}
+        combined_map.update{unlabeled_map}
+        class_number = len(combined_map)
         print("Number of classes in prediction is {}".format(class_number))
-        sample_number = np.ceil((float(len(self.labeled_data)) + float(n)) / float(class_number))
+        sample_number = int(np.ceil((float(len(self.labeled_data)) + float(n)) / float(class_number)))
         print("Expected sample number in each class is {}".format(sample_number))
 
         result = []
 
         while len(result) < n:
-            for key in list(labeled_map.keys()) + list(unlabeled_map.keys()):
+            for key in combined_map:
                 current = len(labeled_map.get(key, []))
                 potential = len(unlabeled_map.get(key, []))
                 if potential == 0:
