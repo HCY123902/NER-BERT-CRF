@@ -60,15 +60,15 @@ class Strategy(object):
         new_param = ['transitions', 'hidden2label.weight', 'hidden2label.bias']
         optimizer_grouped_parameters = [
             {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay) \
-                        and not any(nd in n for nd in new_param)], 'weight_decay': self.weight_decay_finetune},
+                        and not any(nd in n for nd in new_param)], 'weight_decay': self.classifier_weight_decay_finetune},
             {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay) \
                         and not any(nd in n for nd in new_param)], 'weight_decay': 0.0},
             {'params': [p for n, p in param_optimizer if n in ('transitions', 'hidden2label.weight')] \
-                , 'lr': self.lr0_crf_fc, 'weight_decay': self.weight_decay_crf_fc},
+                , 'lr': self.classifier_lr0_crf_fc, 'weight_decay': self.classifier_weight_decay_crf_fc},
             {'params': [p for n, p in param_optimizer if n == 'hidden2label.bias'] \
-                , 'lr': self.lr0_crf_fc, 'weight_decay': 0.0}
+                , 'lr': self.classifier_lr0_crf_fc, 'weight_decay': 0.0}
         ]
-        self.classifier_optimizer = BertAdam(optimizer_grouped_parameters, lr=self.learning_rate0, warmup=self.warmup_proportion)
+        self.classifier_optimizer = BertAdam(optimizer_grouped_parameters, lr=self.classifier_learning_rate0, warmup=self.classifier_warmup_proportion)
         
 
     def query(self, n):
