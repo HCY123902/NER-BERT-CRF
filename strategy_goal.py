@@ -538,8 +538,8 @@ class RandomSampling(Strategy):  ## return selected samples (n pieces) for curre
             return self.unlabeled_data[:n]
 
         combined_map = {}
-        combined_map.update{labeled_map}
-        combined_map.update{unlabeled_map}
+        combined_map.update(labeled_map)
+        combined_map.update(unlabeled_map)
         class_number = len(combined_map)
         print("Number of classes in prediction is {}".format(class_number))
         sample_number = int(np.ceil((float(len(self.labeled_data)) + float(n)) / float(class_number)))
