@@ -5,6 +5,7 @@ and dsgissin/DiscriminativeActiveLearning from github.
 '''
 import argparse
 from re import S
+from classifier import BERT_BILSTM_CRF_KB_NER_CLASSIFIER
 from torch import nn
 import torch
 from scipy.spatial import distance_matrix
@@ -50,7 +51,16 @@ if __name__ == '__main__':
     data_dir = os.path.join('./', 'mmconv_data/')
     tokenizer = BertTokenizer.from_pretrained(args.pretrained_model, do_lower_case=do_lower_case)
 
-    conllProcessor = CoNLLDataProcessor()
+    # Added
+    with open("./turn_label.json", "r", encoding="utf-8") as t:
+        turn_label_map = json.load(t)
+
+    labelToIndex = turn_label_map["labelToIndex"]
+    turn_label_size = len(labelToIndex)
+
+    # Adjusted
+    conllProcessor = CoNLLDataProcessor(labelToIndex)
+
     label_list = conllProcessor.get_labels()
     label_map = conllProcessor.get_label_map()
     print('len_label_list: ', len(label_list))
@@ -89,6 +99,14 @@ if __name__ == '__main__':
                                       num_workers=4,
                                       collate_fn=NerDataset.pad)
 
+    # Added
+    classifier_train_dataset = NerDataset(all_train_examples, tokenizer, label_map, max_seq_length)
+    classifier_train_dataloader = data.DataLoader(dataset=classifier_train_dataset,
+                                       batch_size=args.classifier_batch_size,
+                                       shuffle=True,
+                                       num_workers=4,
+                                       collate_fn=NerDataset.pad)
+
 
     model_path = os.path.join('checkpoint', method_name)
     if not os.path.exists(model_path):
@@ -100,12 +118,27 @@ if __name__ == '__main__':
 
     tagging_model = BERT_BILSTM_CRF_KB_NER( BertModel.from_pretrained(args.pretrained_model), start_label_id, stop_label_id, len(label_list), args.max_seq_len, args.batch_size, device)
 
+    classifier = BERT_BILSTM_CRF_KB_NER_CLASSIFIER(BertModel.from_pretrained(args.pretrained_model), start_label_id, stop_label_id, len(label_list), args.max_seq_len, args.classifier_batch_size, device, turn_label_size)
+
     model_exact_path = os.path.join('checkpoint/'+ method_name, run_name) + "/NER_BERT_BILSTM_CRF_KB_0.pt"
     if os.path.exists(model_exact_path):
         pass
     else:
-        stra = Strategy(args, tagging_model, labeled_data, unlabeled_data,label_map)
+        stra = Strategy(args, tagging_model, labeled_data, unlabeled_data,label_map, classifier)
         valid_acc_prev, valid_f1_prev = stra.train( -1, run_name, len(labeled_dataset), train_dataloader, dev_dataloader, test_dataloader, 0, 0, 0, model_path=model_path)
+        print('time cost: ', (time.time()-start)/3600) 
+    log.flush()
+
+
+    # Added
+    classifier_model_exact_path = os.path.join('checkpoint/classifier') + "/NER_BERT_BILSTM_CRF_KB_CLASSIFIER_0.pt"
+    if os.path.exists(classifier_model_exact_path):
+        pass
+    else:
+        print("Original classifier model is not present. Train the new model")
+        classifier_model_path = os.path.join('checkpoint', 'classifier')
+        classifier_stra = Strategy(args, tagging_model, labeled_data, unlabeled_data,label_map, classifier)
+        classifier_valid_acc_prev, classifier_valid_f1_prev = classifier_stra.train_classifier(-1, len(all_train_examples), classifier_train_dataloader, dev_dataloader, 0, 0, 0, model_path=classifier_model_path, number_of_epochs=50)
         print('time cost: ', (time.time()-start)/3600) 
     log.flush()
     
@@ -131,6 +164,24 @@ if __name__ == '__main__':
         print("init model not loaded!")
         raise NotImplementedError()
 
+    classifier_model_exact_path = os.path.join('checkpoint/classifier') + "/NER_BERT_BILSTM_CRF_KB_CLASSIFIER_0.pt"
+    if os.path.exists(classifier_model_exact_path):
+        classifier_checkpoint = torch.load(classifier_model_exact_path, map_location='cpu')
+        classifier_start_epoch = classifier_checkpoint['epoch'] + 1
+        classifier_valid_acc_prev = classifier_checkpoint['valid_acc']
+        classifier_valid_f1_prev = classifier_checkpoint['valid_f1']
+        classifier_pretrained_dict = classifier_checkpoint['model_state']
+        classifier_net_state_dict = tagging_model.state_dict()
+        classifier_pretrained_dict_selected = {k: v for k, v in classifier_pretrained_dict.items() if k in classifier_net_state_dict}
+        classifier_net_state_dict.update(classifier_pretrained_dict_selected)
+        classifier.load_state_dict(classifier_net_state_dict)
+        print('Loaded the pretrain NER_BERT_BILSTM_CRF_KB_CLASSIFIER model, epoch:', classifier_checkpoint['epoch'], 'valid acc:',
+              classifier_checkpoint['valid_acc'], 'valid f1:', classifier_checkpoint['valid_f1'])
+        
+    else:
+        print("init calssifier model not loaded")
+        raise NotImplementedError()
+
 
     #2. coarse sampling
     run_name = "select"
@@ -143,20 +194,43 @@ if __name__ == '__main__':
  
     # 2.1. selecting samples by the AL strategy
     if method_name == 'entropy':
-        sampler = EntropySampling(args, tagging_model, labeled_data, unlabeled_data, label_map)
+        sampler = EntropySampling(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier)
     if method_name == 'margin':
-        sampler = MarginSampling(args, tagging_model, labeled_data, unlabeled_data, label_map)
+        sampler = MarginSampling(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier)
     if method_name == 'bald':
-        sampler = BALDDropout(args, tagging_model, labeled_data, unlabeled_data, label_map)
+        sampler = BALDDropout(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier)
     if method_name == 'bald2':
-        sampler = BALDDropout2(args, tagging_model, labeled_data, unlabeled_data, label_map)
+        sampler = BALDDropout2(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier)
     if method_name == 'random':
-        sampler = RandomSampling(args, tagging_model, labeled_data, unlabeled_data, label_map)
+        sampler = RandomSampling(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier)
     print('----------------coarse samp_select------------ ')
     log.flush()
 
     # 2.2 start selection interation
     for ind_iter in range(args.n_iter):
+        # Added
+        if ind_iter % 5 == 0:
+            sampler.train_classifier(ind_iter, len(all_train_examples), classifier_train_dataloader, dev_dataloader, 0, 0, 0, model_path=classifier_model_path, number_of_epochs=2)
+
+        # Added for classifier
+        classifier_labeled_examples = conllProcessor._create_examples(sampler.unlabeled_data)
+        classifier_labeled_dataset = NerDataset(classifier_labeled_examples, tokenizer, label_map, max_seq_length)
+        classifier_labeled_dataloader = data.DataLoader(dataset=classifier_labeled_dataset,
+                                            batch_size=args.classifier_batch_size,
+                                            shuffle=False, # No shuffling, sequential access
+                                            num_workers=4,
+                                            collate_fn=NerDataset.pad)
+
+        # Added for classifier
+        classifier_unlabeled_examples = conllProcessor._create_examples(sampler.unlabeled_data)
+        classifier_unlabeled_dataset = NerDataset(classifier_unlabeled_examples, tokenizer, label_map, max_seq_length)
+        classifier_unlabeled_dataloader = data.DataLoader(dataset=classifier_unlabeled_dataset,
+                                            batch_size=args.classifier_batch_size,
+                                            shuffle=False, # No shuffling, sequential access
+                                            num_workers=4,
+                                            collate_fn=NerDataset.pad)
+
+
         print('--------------------ind_iter: ', ind_iter)
         samp_select = sampler.query(select_size)
         samp_select_final = samp_select

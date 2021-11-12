@@ -7,12 +7,14 @@ from torch.utils import data
 import numpy as np
 import random
 
+import json
+
 max_seq_length = 256
 
 class InputExample(object):
     """A single training/test example for NER."""
 
-    def __init__(self, guid, words, onto_labels, db_labels, labels):
+    def __init__(self, guid, words, onto_labels, db_labels, labels, turn_label):
         """Constructs a InputExample.
 
         Args:
@@ -30,6 +32,8 @@ class InputExample(object):
         self.db_labels = db_labels
         # list of label sequence of the sentence,like: [B-ORG, O, B-MISC, O, O, O, B-MISC, O, O]
         self.labels = labels
+        # Added for turn label
+        self.turn_label = turn_label
 
 
 class InputFeatures(object):
@@ -66,10 +70,49 @@ class DataProcessor(object):
         raise NotImplementedError()
 
     @classmethod
-    def _read_data(cls, input_file, ratio=1):
+    def _read_data(cls, input_file, labelToIndex, ratio=1):
         """
         Reads a BIO data.
         """
+        # with open(input_file) as f:
+        #     # out_lines = []
+        #     out_lists = []
+        #     entries = f.read().strip().split("\n\n")
+        #     for entry in entries:
+        #         words = []
+        #         labels = []
+        #         onto_labels = []
+        #         db_labels = []
+        #         for line in entry.splitlines():
+        #             pieces = line.strip().split()
+        #             if len(pieces) < 1:
+        #                 continue
+        #             if pieces[0] == "====":
+        #                 words.append('[SEP]')
+        #                 onto_labels.append(0)
+        #                 db_labels.append(0)
+        #                 labels.append('[SEP]')
+        #                 continue
+
+        #             word = pieces[0]
+        #             # if word == "-DOCSTART-" or word == '':
+        #             #     continue
+        #             words.append(word)
+        #             onto_labels.append(int(pieces[1]))
+        #             db_labels.append(int(pieces[2]))
+        #             labels.append(pieces[-1])
+
+        #         out_lists.append([words, onto_labels, db_labels, labels])
+
+        # if ratio<1:
+        #     labeled_data = random.sample(out_lists, int(ratio*len(out_lists)))
+        #     unlabeled_data = [item for item in out_lists if item not in labeled_data]
+        # else:
+        #     labeled_data = out_lists
+        #     unlabeled_data = None
+
+        # return labeled_data, unlabeled_data
+
         with open(input_file) as f:
             # out_lines = []
             out_lists = []
@@ -79,6 +122,7 @@ class DataProcessor(object):
                 labels = []
                 onto_labels = []
                 db_labels = []
+                turn_label = None
                 for line in entry.splitlines():
                     pieces = line.strip().split()
                     if len(pieces) < 1:
@@ -89,6 +133,11 @@ class DataProcessor(object):
                         db_labels.append(0)
                         labels.append('[SEP]')
                         continue
+                    # Added for turn labels
+                    elif len(pieces) == 1:
+                        assert pieces[0] in labelToIndex
+                        turn_label = labelToIndex[pieces[0]]
+                        continue
 
                     word = pieces[0]
                     # if word == "-DOCSTART-" or word == '':
@@ -98,8 +147,8 @@ class DataProcessor(object):
                     db_labels.append(int(pieces[2]))
                     labels.append(pieces[-1])
 
-                out_lists.append([words, onto_labels, db_labels, labels])
-
+                assert turn_label is not None
+                out_lists.append([words, onto_labels, db_labels, labels, turn_label])
         if ratio<1:
             labeled_data = random.sample(out_lists, int(ratio*len(out_lists)))
             unlabeled_data = [item for item in out_lists if item not in labeled_data]
@@ -115,27 +164,29 @@ class CoNLLDataProcessor(DataProcessor):
     CoNLL-2003
     '''
 
-    def __init__(self):
+    def __init__(self, labelToIndex):
         # self._label_types = [ 'X', '[CLS]', '[SEP]', 'O', 'I-LOC', 'B-PER', 'I-PER', 'I-ORG', 'I-MISC', 'B-MISC', 'B-LOC', 'B-ORG']
         self._label_types = ['X', '[CLS]', '[SEP]', 'O', 'I', 'B']
         self._num_labels = len(self._label_types)
         self._label_map = {label: i for i,
                                         label in enumerate(self._label_types)}
 
+        self.labelToIndex = labelToIndex
+
     def get_train_data_list_ratio(self, data_dir, data_ratio):
-        labeled_data, unlabeled_data = self._read_data(os.path.join(data_dir, "train.txt"), ratio=data_ratio)
+        labeled_data, unlabeled_data = self._read_data(os.path.join(data_dir, "train.txt"), self.labelToIndex, ratio=data_ratio)
         return labeled_data, unlabeled_data
 
     def get_train_examples(self, data_dir):
-        labeled_data, _ = self._read_data(os.path.join(data_dir, "train.txt"))
+        labeled_data, _ = self._read_data(os.path.join(data_dir, "train.txt"), self.labelToIndex)
         return self._create_examples(labeled_data)
 
     def get_dev_examples(self, data_dir):
-        labeled_data, _ = self._read_data(os.path.join(data_dir, "valid.txt"))
+        labeled_data, _ = self._read_data(os.path.join(data_dir, "valid.txt"), self.labelToIndex)
         return self._create_examples(labeled_data)
 
     def get_test_examples(self, data_dir):
-        labeled_data, _ = self._read_data(os.path.join(data_dir, "test.txt"))
+        labeled_data, _ = self._read_data(os.path.join(data_dir, "test.txt"), self.labelToIndex)
         return self._create_examples(labeled_data)
 
     def get_labels(self):
@@ -154,15 +205,27 @@ class CoNLLDataProcessor(DataProcessor):
         return self._label_map['[SEP]']
 
     def _create_examples(self, all_lists):
+        # examples = []
+        # for (i, one_lists) in enumerate(all_lists):
+        #     guid = i
+        #     words = one_lists[0]
+        #     onto_labels = one_lists[1]
+        #     db_labels = one_lists[2]
+        #     labels = one_lists[-1]
+        #     examples.append(InputExample(
+        #         guid=guid, words=words, onto_labels=onto_labels, db_labels=db_labels, labels=labels))
+        # return examples
         examples = []
         for (i, one_lists) in enumerate(all_lists):
             guid = i
             words = one_lists[0]
             onto_labels = one_lists[1]
             db_labels = one_lists[2]
-            labels = one_lists[-1]
+            # Adjusted
+            labels = one_lists[-2]
+            turn_label = one_lists[-1]
             examples.append(InputExample(
-                guid=guid, words=words, onto_labels=onto_labels, db_labels=db_labels, labels=labels))
+                guid=guid, words=words, onto_labels=onto_labels, db_labels=db_labels, labels=labels, turn_label=turn_label))
         return examples
 
     def _create_examples2(self, lines):
@@ -244,7 +307,8 @@ def example2feature(example, tokenizer, label_map, max_seq_length):
         input_mask=input_mask,
         segment_ids=segment_ids,
         predict_mask=predict_mask,
-        label_ids=label_ids)
+        label_ids=label_ids,
+        turn_label=example.turn_label)
 
     return feat
 
@@ -262,8 +326,11 @@ class NerDataset(data.Dataset):
 
     def __getitem__(self, idx):
         feat = example2feature(self.examples[idx], self.tokenizer, self.label_map, self.max_seq_length)
-        return feat.input_ids, feat.onto_labels, feat.db_labels, feat.input_mask, feat.segment_ids, feat.predict_mask, feat.label_ids
 
+        # Adjusted
+        # return feat.input_ids, feat.onto_labels, feat.db_labels, feat.input_mask, feat.segment_ids, feat.predict_mask, feat.label_ids
+        return feat.input_ids, feat.onto_labels, feat.db_labels, feat.input_mask, feat.segment_ids, feat.predict_mask, feat.label_ids, feat.turn_label
+    
     @classmethod
     def pad(cls, batch):
         seqlen_list = [len(sample[0]) for sample in batch]
@@ -278,7 +345,13 @@ class NerDataset(data.Dataset):
         predict_mask_list = torch.ByteTensor(f(5, maxlen))
         label_ids_list = torch.LongTensor(f(6, maxlen))
 
-        return input_ids_list, onto_labels_list, db_labels_list, input_mask_list, segment_ids_list, predict_mask_list, label_ids_list
+        # Added for turn label
+        turn_labels = [sample[7] for sample in batch]
+        turn_labels = torch.LongTensor(turn_labels)
+
+        # return input_ids_list, onto_labels_list, db_labels_list, input_mask_list, segment_ids_list, predict_mask_list, label_ids_list
+        return input_ids_list, onto_labels_list, db_labels_list, input_mask_list, segment_ids_list, predict_mask_list, label_ids_list, turn_labels
+        
     
     @classmethod
     def padselect(cls, batch):
@@ -295,5 +368,10 @@ class NerDataset(data.Dataset):
         predict_mask_list = torch.ByteTensor(f(5, maxlen))
         label_ids_list = torch.LongTensor(f(6, maxlen))
 
-        return input_ids_list, onto_labels_list, db_labels_list, input_mask_list, segment_ids_list, predict_mask_list, label_ids_list
+        # Added for turn label
+        turn_labels = [sample[7] for sample in batch]
+        turn_labels = torch.LongTensor(turn_labels)
+
+        # return input_ids_list, onto_labels_list, db_labels_list, input_mask_list, segment_ids_list, predict_mask_list, label_ids_list
+        return input_ids_list, onto_labels_list, db_labels_list, input_mask_list, segment_ids_list, predict_mask_list, label_ids_list, turn_labels
 

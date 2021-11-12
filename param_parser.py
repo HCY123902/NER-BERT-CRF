@@ -3,6 +3,9 @@ import argparse
 def parameter_parser():
     parser = argparse.ArgumentParser()
 
+    parser.add_argument('--classifier_batch_size',type= int, default = 128, help='batch size for classifier.')
+    parser.add_argument('--classifier_model_path',type= int, default = 128, help='path of the classifier model.')
+
     parser.add_argument('--batch_size',type= int, default = 32, help='batch size for inference.')
     parser.add_argument('--data_ratio', type= float, default = 0.05, help='proportion of total training data used.')
     parser.add_argument('--init_data_ratio', type= float, default = 0.05, help='proportion of total training data used.')
