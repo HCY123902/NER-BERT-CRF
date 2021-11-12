@@ -25,7 +25,7 @@ import json
 class BERT_BILSTM_CRF_KB_NER_CLASSIFIER(nn.Module):
 
     def __init__(self, bert_model, start_label_id, stop_label_id, num_labels, max_seq_length, batch_size, device, turn_label_size, gradient=0):
-        super(BERT_BILSTM_CRF_KB_NER, self).__init__()
+        super(BERT_BILSTM_CRF_KB_NER_CLASSIFIER, self).__init__()
         self.hidden_size = 768
         self.start_label_id = start_label_id
         self.stop_label_id = stop_label_id
