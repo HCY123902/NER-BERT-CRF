@@ -11,7 +11,7 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader, dataloader
-from transformers.models.auto.tokenization_auto import tokenizer_class_from_name
+# from transformers.models.auto.tokenization_auto import tokenizer_class_from_name
 from data_pre import NerDataset
 from data_pre import CoNLLDataProcessor
 from pytorch_pretrained_bert.optimization import BertAdam, warmup_linear
