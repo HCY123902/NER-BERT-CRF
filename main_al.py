@@ -79,8 +79,8 @@ if __name__ == '__main__':
     # 1. init training
     run_name = "init"
     method_name = args.coarse_sampling
-    log = open(os.path.join(log_path, run_name+'_'+ args.coarse_sampling +".txt"), "w")
-    sys.stdout = log
+    # log = open(os.path.join(log_path, run_name+'_'+ args.coarse_sampling +".txt"), "w")
+    # sys.stdout = log
     labeled_data, unlabeled_data = conllProcessor.get_train_data_list_ratio(data_dir, args.init_data_ratio)
     labeled_dataset = conllProcessor._create_examples(labeled_data)
     init_train_dataset = NerDataset(labeled_dataset, tokenizer, label_map, max_seq_length)
@@ -111,6 +111,12 @@ if __name__ == '__main__':
                                        num_workers=4,
                                        collate_fn=NerDataset.pad)
 
+    classifier_dev_dataloader = data.DataLoader(dataset=dev_dataset,
+                                       batch_size=args.classifier_batch_size,
+                                       shuffle=False,
+                                       num_workers=4,
+                                       collate_fn=NerDataset.pad)
+
 
     model_path = os.path.join('checkpoint', method_name)
     if not os.path.exists(model_path):
@@ -131,7 +137,7 @@ if __name__ == '__main__':
         stra = Strategy(args, tagging_model, labeled_data, unlabeled_data,label_map, classifier, labelToIndex=labelToIndex)
         valid_acc_prev, valid_f1_prev = stra.train( -1, run_name, len(labeled_dataset), train_dataloader, dev_dataloader, test_dataloader, 0, 0, 0, model_path=model_path)
         print('time cost: ', (time.time()-start)/3600) 
-    log.flush()
+    # log.flush()
 
 
     # Added
@@ -144,7 +150,7 @@ if __name__ == '__main__':
         classifier_stra = Strategy(args, tagging_model, labeled_data, unlabeled_data,label_map, classifier, labelToIndex=labelToIndex)
         classifier_valid_acc_prev, classifier_valid_f1_prev = classifier_stra.train_classifier(-1, len(all_train_examples), classifier_train_dataloader, dev_dataloader, 0, 0, 0, model_path=classifier_model_path, number_of_epochs=50)
         print('time cost: ', (time.time()-start)/3600) 
-    log.flush()
+    # log.flush()
     
 
 
@@ -208,16 +214,16 @@ if __name__ == '__main__':
     if method_name == 'random':
         sampler = RandomSampling(args, tagging_model, labeled_data, unlabeled_data, label_map, classifier, labelToIndex=labelToIndex)
     print('----------------coarse samp_select------------ ')
-    log.flush()
+    # log.flush()
 
     # 2.2 start selection interation
     for ind_iter in range(args.n_iter):
         # Added
         if ind_iter % 5 == 0:
-            sampler.train_classifier(ind_iter, len(all_train_examples), classifier_train_dataloader, dev_dataloader, 0, 0, 0, model_path=classifier_model_path, number_of_epochs=2)
+            sampler.train_classifier(ind_iter, len(all_train_examples), classifier_train_dataloader, classifier_dev_dataloader, 0, 0, 0, model_path=classifier_model_path, number_of_epochs=2)
 
         # Added for classifier
-        classifier_labeled_examples = conllProcessor._create_examples(sampler.unlabeled_data)
+        classifier_labeled_examples = conllProcessor._create_examples(sampler.labeled_data)
         classifier_labeled_dataset = NerDataset(classifier_labeled_examples, tokenizer, label_map, max_seq_length)
         classifier_labeled_dataloader = data.DataLoader(dataset=classifier_labeled_dataset,
                                             batch_size=args.classifier_batch_size,
@@ -236,7 +242,7 @@ if __name__ == '__main__':
 
 
         print('--------------------ind_iter: ', ind_iter)
-        samp_select = sampler.query(select_size)
+        samp_select = sampler.query(select_size, classifier_labeled_dataloader, classifier_unlabeled_dataloader)
         samp_select_final = samp_select
         print('coarse sampling filter size now: ', len(samp_select))
 
@@ -252,7 +258,7 @@ if __name__ == '__main__':
         # update
         sampler.update_dataset(samp_select_final)
         print('ranking sampling filter size now: ', len(samp_select_final))
-        log.flush()
+        # log.flush()
 
         labeled_examples = conllProcessor._create_examples( sampler.labeled_data )
         #unlabeled_examples = conllProcessor._create_examples( sampler.unlabeled_data )
@@ -267,9 +273,9 @@ if __name__ == '__main__':
         print('size of unlabeled_data: ', len(sampler.unlabeled_data)) #
         print('-----------------retraining-----------------')
         valid_acc_prev, valid_f1_prev = sampler.train(ind_iter, run_name, len(labeled_examples), train_dataloader, dev_dataloader, test_dataloader, valid_acc_prev, valid_f1_prev, start_epoch, model_path)
-        log.flush()
+        # log.flush()
 
     end = time.time()
     print('time cost: ', str(end-start))
-    log.flush()
-    log.close()
+    # log.flush()
+    # log.close()
