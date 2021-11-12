@@ -1,0 +1,315 @@
+training... 10 epochs...
+***** Running training *****
+  Num examples = 509
+  Batch size = 16
+  Num steps = 318
+training................
+--------------------------------------------------------------
+Epoch:0 completed, Total training's Loss: 621909.09375, Spend: 0.26720005671183267m
+Epoch:0, Acc:78.60, Precision: 58.90, Recall: 16.60, F1: 25.90, micro: 80.34, macro: 47.12, span-p: 12.87, span-r: 4.15, spanf1: 6.27 on Valid_set, Spend: 0.325 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:1 completed, Total training's Loss: 619115.06640625, Spend: 0.18597312768300375m
+Epoch:1, Acc:87.36, Precision: 75.08, Recall: 59.63, F1: 66.47, micro: 88.37, macro: 75.62, span-p: 54.04, span-r: 41.77, spanf1: 47.12 on Valid_set, Spend: 0.354 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:2 completed, Total training's Loss: 617975.265625, Spend: 0.1897873044013977m
+Epoch:2, Acc:90.62, Precision: 73.45, Recall: 79.39, F1: 76.31, micro: 90.79, macro: 82.60, span-p: 60.94, span-r: 70.58, spanf1: 65.41 on Valid_set, Spend: 0.390 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:3 completed, Total training's Loss: 617615.5234375, Spend: 0.18261598745981852m
+Epoch:3, Acc:92.09, Precision: 78.54, Recall: 80.54, F1: 79.52, micro: 92.17, macro: 84.98, span-p: 68.01, span-r: 74.66, spanf1: 71.18 on Valid_set, Spend: 0.376 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:4 completed, Total training's Loss: 616810.544921875, Spend: 0.18714627027511596m
+Epoch:4, Acc:92.43, Precision: 79.50, Recall: 81.67, F1: 80.57, micro: 92.51, macro: 85.71, span-p: 69.87, span-r: 76.78, spanf1: 73.16 on Valid_set, Spend: 0.378 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:5 completed, Total training's Loss: 617340.95703125, Spend: 0.1895000457763672m
+Epoch:5, Acc:92.47, Precision: 79.84, Recall: 81.51, F1: 80.66, micro: 92.54, macro: 85.77, span-p: 70.33, span-r: 76.73, spanf1: 73.39 on Valid_set, Spend: 0.379 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:6 completed, Total training's Loss: 616037.8984375, Spend: 0.20616761048634846m
+Epoch:6, Acc:92.59, Precision: 80.25, Recall: 81.46, F1: 80.85, micro: 92.63, macro: 85.92, span-p: 70.71, span-r: 76.64, spanf1: 73.55 on Valid_set, Spend: 0.379 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:7 completed, Total training's Loss: 616009.326171875, Spend: 0.1851446032524109m
+Epoch:7, Acc:92.32, Precision: 78.07, Recall: 83.31, F1: 80.60, micro: 92.38, macro: 85.70, span-p: 68.75, span-r: 77.80, spanf1: 72.99 on Valid_set, Spend: 0.384 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:8 completed, Total training's Loss: 616616.896484375, Spend: 0.18575550317764283m
+Epoch:8, Acc:92.42, Precision: 78.71, Recall: 82.86, F1: 80.73, micro: 92.47, macro: 85.80, span-p: 69.32, span-r: 77.56, spanf1: 73.21 on Valid_set, Spend: 0.388 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:9 completed, Total training's Loss: 615991.12109375, Spend: 0.18314825693766276m
+Epoch:9, Acc:92.39, Precision: 78.51, Recall: 82.97, F1: 80.68, micro: 92.44, macro: 85.76, span-p: 69.10, span-r: 77.66, spanf1: 73.13 on Valid_set, Spend: 0.381 minutes for evaluation
+--------------------------------------------------------------
+testing................
+Epoch:9, Acc:92.09, Precision: 78.80, Recall: 81.85, F1: 80.30, micro: 92.13, macro: 85.41, span-p: 67.70, span-r: 75.46, spanf1: 71.37 on Test_set, Spend: 0.709 minutes for evaluation
+--------------------------------------------------------------
+time cost:  0.1160156226158142
+run_name_init bert_bilstm_crf_kb
+Loaded the pretrain NER_BERT_BILSTM_CRF_KB model, epoch: 6 valid acc: 0.9258614635337944 valid f1: 0.8085261875761266
+----------------coarse samp_select------------ 
+--------------------ind_iter:  0
+get the dropout output
+done
+coarse sampling filter size now:  509
+-----------------updating dataset------- 
+ranking sampling filter size now:  509
+size of labeled_data:  1018
+size of unlabeled_data:  23087
+-----------------retraining-----------------
+training... 2 epochs...
+***** Running training *****
+  Num examples = 1018
+  Batch size = 16
+  Num steps = 127
+training................
+--------------------------------------------------------------
+Epoch:0 completed, Total training's Loss: 1234053.5546875, Spend: 0.39902416070302327m
+Epoch:0, Acc:92.39, Precision: 78.15, Recall: 83.75, F1: 80.85, micro: 92.43, macro: 85.84, span-p: 70.16, span-r: 77.90, spanf1: 73.83 on Valid_set, Spend: 0.368 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:1 completed, Total training's Loss: 1231834.419921875, Spend: 0.35125097036361697m
+Epoch:1, Acc:92.71, Precision: 80.20, Recall: 82.76, F1: 81.46, micro: 92.76, macro: 86.32, span-p: 71.03, span-r: 78.26, spanf1: 74.47 on Valid_set, Spend: 0.370 minutes for evaluation
+--------------------------------------------------------------
+testing................
+Epoch:1, Acc:92.36, Precision: 80.27, Recall: 81.50, F1: 80.88, micro: 92.41, macro: 85.84, span-p: 69.36, span-r: 75.83, spanf1: 72.45 on Test_set, Spend: 0.679 minutes for evaluation
+--------------------------------------------------------------
+--------------------ind_iter:  1
+get the dropout output
+done
+coarse sampling filter size now:  509
+-----------------updating dataset------- 
+ranking sampling filter size now:  509
+size of labeled_data:  1527
+size of unlabeled_data:  22578
+-----------------retraining-----------------
+training... 2 epochs...
+***** Running training *****
+  Num examples = 1527
+  Batch size = 16
+  Num steps = 190
+training................
+--------------------------------------------------------------
+Epoch:0 completed, Total training's Loss: 1846773.5703125, Spend: 0.5129647453625997m
+Epoch:0, Acc:93.18, Precision: 83.19, Recall: 81.51, F1: 82.34, micro: 93.22, macro: 86.97, span-p: 75.18, span-r: 76.45, spanf1: 75.81 on Valid_set, Spend: 0.357 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:1 completed, Total training's Loss: 1846282.720703125, Spend: 0.510439380009969m
+Epoch:1, Acc:93.22, Precision: 82.11, Recall: 83.11, F1: 82.60, micro: 93.25, macro: 87.16, span-p: 73.49, span-r: 78.79, spanf1: 76.05 on Valid_set, Spend: 0.361 minutes for evaluation
+--------------------------------------------------------------
+testing................
+Epoch:1, Acc:92.76, Precision: 81.66, Recall: 81.96, F1: 81.81, micro: 92.79, macro: 86.52, span-p: 71.55, span-r: 76.32, spanf1: 73.86 on Test_set, Spend: 0.673 minutes for evaluation
+--------------------------------------------------------------
+--------------------ind_iter:  2
+get the dropout output
+done
+coarse sampling filter size now:  509
+-----------------updating dataset------- 
+ranking sampling filter size now:  509
+size of labeled_data:  2036
+size of unlabeled_data:  22069
+-----------------retraining-----------------
+training... 2 epochs...
+***** Running training *****
+  Num examples = 2036
+  Batch size = 16
+  Num steps = 254
+training................
+--------------------------------------------------------------
+Epoch:0 completed, Total training's Loss: 2460208.1328125, Spend: 0.6667178432146709m
+Epoch:0, Acc:93.34, Precision: 83.71, Recall: 81.73, F1: 82.71, micro: 93.36, macro: 87.24, span-p: 75.36, span-r: 77.70, spanf1: 76.51 on Valid_set, Spend: 0.362 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:1 completed, Total training's Loss: 2457906.53515625, Spend: 0.6682940165201823m
+Epoch:1, Acc:93.25, Precision: 81.78, Recall: 83.97, F1: 82.86, micro: 93.27, macro: 87.32, span-p: 74.11, span-r: 79.64, spanf1: 76.77 on Valid_set, Spend: 0.372 minutes for evaluation
+--------------------------------------------------------------
+testing................
+Epoch:1, Acc:92.97, Precision: 81.83, Recall: 83.23, F1: 82.53, micro: 93.00, macro: 87.03, span-p: 72.42, span-r: 77.60, spanf1: 74.92 on Test_set, Spend: 0.683 minutes for evaluation
+--------------------------------------------------------------
+--------------------ind_iter:  3
+get the dropout output
+done
+coarse sampling filter size now:  509
+-----------------updating dataset------- 
+ranking sampling filter size now:  509
+size of labeled_data:  2545
+size of unlabeled_data:  21560
+-----------------retraining-----------------
+training... 2 epochs...
+***** Running training *****
+  Num examples = 2545
+  Batch size = 16
+  Num steps = 318
+training................
+--------------------------------------------------------------
+Epoch:0 completed, Total training's Loss: 3059491.330078125, Spend: 0.9996291240056355m
+Epoch:0, Acc:93.31, Precision: 81.41, Recall: 84.82, F1: 83.08, micro: 93.33, macro: 87.48, span-p: 74.95, span-r: 79.77, spanf1: 77.28 on Valid_set, Spend: 0.398 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:1 completed, Total training's Loss: 3056510.6943359375, Spend: 0.9760685722033183m
+Epoch:1, Acc:93.47, Precision: 82.70, Recall: 84.02, F1: 83.35, micro: 93.50, macro: 87.69, span-p: 76.03, span-r: 79.48, spanf1: 77.72 on Valid_set, Spend: 0.391 minutes for evaluation
+--------------------------------------------------------------
+testing................
+Epoch:1, Acc:93.08, Precision: 82.63, Recall: 82.95, F1: 82.79, micro: 93.11, macro: 87.22, span-p: 74.00, span-r: 77.29, spanf1: 75.61 on Test_set, Spend: 0.732 minutes for evaluation
+--------------------------------------------------------------
+--------------------ind_iter:  4
+get the dropout output
+done
+coarse sampling filter size now:  509
+-----------------updating dataset------- 
+ranking sampling filter size now:  509
+size of labeled_data:  3054
+size of unlabeled_data:  21051
+-----------------retraining-----------------
+training... 2 epochs...
+***** Running training *****
+  Num examples = 3054
+  Batch size = 16
+  Num steps = 381
+training................
+--------------------------------------------------------------
+Epoch:0 completed, Total training's Loss: 3656740.853515625, Spend: 1.158333706855774m
+Epoch:0, Acc:93.54, Precision: 84.34, Recall: 82.33, F1: 83.32, micro: 93.58, macro: 87.69, span-p: 77.23, span-r: 77.55, spanf1: 77.39 on Valid_set, Spend: 0.388 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:1 completed, Total training's Loss: 3651808.033203125, Spend: 1.202884050210317m
+Epoch:1, Acc:93.55, Precision: 83.18, Recall: 83.95, F1: 83.57, micro: 93.60, macro: 87.85, span-p: 76.47, span-r: 78.99, spanf1: 77.71 on Valid_set, Spend: 0.392 minutes for evaluation
+--------------------------------------------------------------
+testing................
+Epoch:1, Acc:93.28, Precision: 83.41, Recall: 83.06, F1: 83.23, micro: 93.33, macro: 87.56, span-p: 75.13, span-r: 76.99, spanf1: 76.05 on Test_set, Spend: 0.730 minutes for evaluation
+--------------------------------------------------------------
+--------------------ind_iter:  5
+get the dropout output
+done
+coarse sampling filter size now:  509
+-----------------updating dataset------- 
+ranking sampling filter size now:  509
+size of labeled_data:  3563
+size of unlabeled_data:  20542
+-----------------retraining-----------------
+training... 2 epochs...
+***** Running training *****
+  Num examples = 3563
+  Batch size = 16
+  Num steps = 445
+training................
+--------------------------------------------------------------
+Epoch:0 completed, Total training's Loss: 4256315.72265625, Spend: 1.3802809079488119m
+Epoch:0, Acc:93.33, Precision: 81.68, Recall: 84.77, F1: 83.20, micro: 93.39, macro: 87.56, span-p: 75.38, span-r: 79.29, spanf1: 77.28 on Valid_set, Spend: 0.401 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:1 completed, Total training's Loss: 4252426.009765625, Spend: 1.3311748305956523m
+Epoch:1, Acc:93.52, Precision: 82.82, Recall: 84.33, F1: 83.57, micro: 93.56, macro: 87.84, span-p: 76.04, span-r: 79.60, spanf1: 77.78 on Valid_set, Spend: 0.392 minutes for evaluation
+--------------------------------------------------------------
+testing................
+Epoch:1, Acc:93.23, Precision: 83.01, Recall: 83.41, F1: 83.21, micro: 93.28, macro: 87.53, span-p: 75.17, span-r: 77.74, spanf1: 76.44 on Test_set, Spend: 0.733 minutes for evaluation
+--------------------------------------------------------------
+--------------------ind_iter:  6
+get the dropout output
+done
+coarse sampling filter size now:  509
+-----------------updating dataset------- 
+ranking sampling filter size now:  509
+size of labeled_data:  4072
+size of unlabeled_data:  20033
+-----------------retraining-----------------
+training... 2 epochs...
+***** Running training *****
+  Num examples = 4072
+  Batch size = 16
+  Num steps = 509
+training................
+--------------------------------------------------------------
+Epoch:0 completed, Total training's Loss: 4855452.658203125, Spend: 1.5650663375854492m
+Epoch:0, Acc:93.68, Precision: 83.68, Recall: 84.20, F1: 83.94, micro: 93.72, macro: 88.12, span-p: 76.85, span-r: 80.01, spanf1: 78.39 on Valid_set, Spend: 0.393 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:1 completed, Total training's Loss: 4851326.45703125, Spend: 1.5157069404919943m
+Epoch:1, Acc:93.69, Precision: 83.85, Recall: 84.01, F1: 83.93, micro: 93.74, macro: 88.12, span-p: 77.32, span-r: 79.42, spanf1: 78.35 on Valid_set, Spend: 0.395 minutes for evaluation
+--------------------------------------------------------------
+testing................
+Epoch:1, Acc:93.42, Precision: 84.04, Recall: 83.19, F1: 83.61, micro: 93.46, macro: 87.83, span-p: 76.46, span-r: 77.53, spanf1: 76.99 on Test_set, Spend: 0.726 minutes for evaluation
+--------------------------------------------------------------
+--------------------ind_iter:  7
+get the dropout output
+done
+coarse sampling filter size now:  509
+-----------------updating dataset------- 
+ranking sampling filter size now:  509
+size of labeled_data:  4581
+size of unlabeled_data:  19524
+-----------------retraining-----------------
+training... 2 epochs...
+***** Running training *****
+  Num examples = 4581
+  Batch size = 16
+  Num steps = 572
+training................
+--------------------------------------------------------------
+Epoch:0 completed, Total training's Loss: 5446611.16015625, Spend: 1.748150610923767m
+Epoch:0, Acc:93.70, Precision: 83.81, Recall: 84.19, F1: 84.00, micro: 93.74, macro: 88.16, span-p: 77.36, span-r: 79.89, spanf1: 78.61 on Valid_set, Spend: 0.396 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:1 completed, Total training's Loss: 5440328.455078125, Spend: 1.7668266654014588m
+Epoch:1, Acc:93.70, Precision: 83.69, Recall: 84.25, F1: 83.97, micro: 93.74, macro: 88.15, span-p: 77.05, span-r: 79.81, spanf1: 78.41 on Valid_set, Spend: 0.394 minutes for evaluation
+--------------------------------------------------------------
+testing................
+Epoch:1, Acc:93.45, Precision: 83.85, Recall: 83.54, F1: 83.69, micro: 93.49, macro: 87.89, span-p: 76.15, span-r: 77.94, spanf1: 77.03 on Test_set, Spend: 0.729 minutes for evaluation
+--------------------------------------------------------------
+--------------------ind_iter:  8
+get the dropout output
+done
+coarse sampling filter size now:  509
+-----------------updating dataset------- 
+ranking sampling filter size now:  509
+size of labeled_data:  5090
+size of unlabeled_data:  19015
+-----------------retraining-----------------
+training... 2 epochs...
+***** Running training *****
+  Num examples = 5090
+  Batch size = 16
+  Num steps = 636
+training................
+--------------------------------------------------------------
+Epoch:0 completed, Total training's Loss: 6033830.5625, Spend: 1.9352174520492553m
+Epoch:0, Acc:93.76, Precision: 84.00, Recall: 84.09, F1: 84.05, micro: 93.80, macro: 88.21, span-p: 77.65, span-r: 79.87, spanf1: 78.74 on Valid_set, Spend: 0.392 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:1 completed, Total training's Loss: 6030225.3818359375, Spend: 1.921661897500356m
+Epoch:1, Acc:93.69, Precision: 83.23, Recall: 84.61, F1: 83.91, micro: 93.73, macro: 88.11, span-p: 76.86, span-r: 80.27, spanf1: 78.53 on Valid_set, Spend: 0.395 minutes for evaluation
+--------------------------------------------------------------
+testing................
+Epoch:1, Acc:93.43, Precision: 83.51, Recall: 83.81, F1: 83.66, micro: 93.47, macro: 87.87, span-p: 76.07, span-r: 78.47, spanf1: 77.25 on Test_set, Spend: 0.735 minutes for evaluation
+--------------------------------------------------------------
+--------------------ind_iter:  9
+get the dropout output
+done
+coarse sampling filter size now:  509
+-----------------updating dataset------- 
+ranking sampling filter size now:  509
+size of labeled_data:  5599
+size of unlabeled_data:  18506
+-----------------retraining-----------------
+training... 2 epochs...
+***** Running training *****
+  Num examples = 5599
+  Batch size = 16
+  Num steps = 699
+training................
+--------------------------------------------------------------
+Epoch:0 completed, Total training's Loss: 6604036.302734375, Spend: 2.1556169350941974m
+Epoch:0, Acc:93.81, Precision: 83.93, Recall: 84.49, F1: 84.21, micro: 93.85, macro: 88.33, span-p: 76.79, span-r: 80.32, spanf1: 78.51 on Valid_set, Spend: 0.403 minutes for evaluation
+--------------------------------------------------------------
+--------------------------------------------------------------
+Epoch:1 completed, Total training's Loss: 6595712.17578125, Spend: 2.12554053068161m
+Epoch:1, Acc:93.81, Precision: 83.89, Recall: 84.62, F1: 84.25, micro: 93.84, macro: 88.35, span-p: 77.40, span-r: 80.27, spanf1: 78.81 on Valid_set, Spend: 0.399 minutes for evaluation
+--------------------------------------------------------------
+testing................
+Epoch:1, Acc:93.59, Precision: 84.21, Recall: 83.96, F1: 84.09, micro: 93.63, macro: 88.18, span-p: 76.82, span-r: 78.75, spanf1: 77.77 on Test_set, Spend: 0.732 minutes for evaluation
+--------------------------------------------------------------
+--------------------ind_iter:  10
+get the dropout output
