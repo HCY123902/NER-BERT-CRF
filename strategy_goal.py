@@ -497,6 +497,7 @@ class Strategy(object):
         labeled_map, unlabeled_map, unlabeled_prediction = self.classify_labeled_and_unlabeled_set(labeled_loader, unlabeled_loader)
 
         if len(unlabeled_prediction) <= n:
+            n = min(n, rank.size(0))
             _, top_n_index = torch.topk(rank, n, largest=True)  # 从大到小
             top_n_index = top_n_index.numpy().tolist()
 
@@ -513,16 +514,28 @@ class Strategy(object):
             _, top_n_index = torch.topk(rank, len(self.unlabeled_data), largest=True)  # 从大到小
             top_n_index = top_n_index.numpy().tolist()
 
-            selected_class_count = {}
+            # selected_class_count = {}
+            selected_class_count = labeled_map
 
-            for index in top_n_index:
-                class_count = selected_class_count.get(unlabeled_prediction[index], 0)
-                if class_count < sample_number:
-                    selected_data.append(self.unlabeled_data[index])
-                    selected_class_count[unlabeled_prediction[index]] = class_count + 1
-                if len(selected_data) >= n:
+            iteration = 1
+            previous = len(selected_data)
+            
+            while len(selected_data) < n:
+                selected_data = []
+                for index in top_n_index:
+                    class_count = selected_class_count.get(unlabeled_prediction[index], 0)
+                    if class_count < iteration * sample_number:
+                        selected_data.append(self.unlabeled_data[index])
+                        selected_class_count[unlabeled_prediction[index]] = class_count + 1
+                    if len(selected_data) >= n:
+                        break
+                iteration = iteration + 1
+
+                if len(selected_data) <= previous:
                     break
-                
+                else:
+                    previous = len(selected_data)
+
             return selected_data[:n]
 
 class RandomSampling(Strategy):  ## return selected samples (n pieces) for current iteration
@@ -547,6 +560,8 @@ class RandomSampling(Strategy):  ## return selected samples (n pieces) for curre
 
         result = []
 
+        previous = len(result)
+
         while len(result) < n:
             for key in combined_map:
                 current = len(labeled_map.get(key, []))
@@ -561,6 +576,12 @@ class RandomSampling(Strategy):  ## return selected samples (n pieces) for curre
                 else:
                     result.extend([self.unlabeled_data[i] for i in unlabeled_map[key][:sample_number - current]])
                     unlabeled_map[key] = unlabeled_map[key][sample_number - current:]
+                if len(result) >= n:
+                    break
+            if len(result) <= previous:
+                break
+            else:
+                previous = len(result)
 
         return result[:n]
 
