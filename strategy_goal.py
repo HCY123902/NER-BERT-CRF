@@ -615,11 +615,13 @@ class MarginSampling(Strategy):
                 dial_score_avg[i] = dial_score.mean()
             final_score = dial_score_avg
 
-        selected_data = []
-        new_indices = final_score.sort()[1][:n]
-        for index in new_indices:
-            selected_data.append(self.unlabeled_data[index])
-        return selected_data
+        # selected_data = []
+        # new_indices = final_score.sort()[1][:n]
+        # for index in new_indices:
+        #     selected_data.append(self.unlabeled_data[index])
+        # return selected_data
+
+        return self.sample_with_ranking(n, final_score, labeled_loader, unlabeled_loader)
 
 
 class EntropySampling(Strategy):
