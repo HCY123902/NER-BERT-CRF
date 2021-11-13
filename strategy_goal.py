@@ -507,15 +507,16 @@ class Strategy(object):
         else:
             class_number = len(labeled_map) + len(unlabeled_map)
             print("Number of classes in prediction is {}".format(class_number))
-            sample_number = np.ceil((float(len(self.labeled_data)) + float(n)) / float(class_number))
+            sample_number = int(np.ceil((float(len(self.labeled_data)) + float(n)) / float(class_number)))
             print("Expected sample number in each class is {}".format(sample_number))
 
 
             _, top_n_index = torch.topk(rank, len(self.unlabeled_data), largest=True)  # 从大到小
             top_n_index = top_n_index.numpy().tolist()
 
-            # selected_class_count = {}
-            selected_class_count = labeled_map
+            selected_class_count = {}
+            for c in labeled_map:
+                selected_class_count[c] = len(labeled_map[c])
 
             iteration = 1
             previous = len(selected_data)
