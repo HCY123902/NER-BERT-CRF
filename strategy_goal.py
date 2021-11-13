@@ -505,7 +505,10 @@ class Strategy(object):
                 selected_data.append(self.unlabeled_data[index])
             return selected_data
         else:
-            class_number = len(labeled_map) + len(unlabeled_map)
+            combined_map = {}
+            combined_map.update(labeled_map)
+            combined_map.update(unlabeled_map)
+            class_number = len(combined_map)
             print("Number of classes in prediction is {}".format(class_number))
             sample_number = int(np.ceil((float(len(self.labeled_data)) + float(n)) / float(class_number)))
             print("Expected sample number in each class is {}".format(sample_number))
