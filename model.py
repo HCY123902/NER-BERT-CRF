@@ -41,7 +41,10 @@ class BERT_BILSTM_CRF_KB_NER(nn.Module):
         self.db_embed = torch.nn.Embedding(2, 5)
 
         # Maps the output of the bert into label space.
-        self.rnn = nn.LSTM(bidirectional=True, num_layers=2, input_size=778, hidden_size=778 // 2, batch_first=True)
+
+        # Adjusted
+        self.rnn = nn.LSTM(bidirectional=True, num_layers=2, input_size=773, hidden_size=778 // 2, batch_first=True)
+
         self.hidden2label = nn.Linear(self.hidden_size + 10, self.num_labels)
 
         # Matrix of transition parameters.  Entry i,j is the score of transitioning *to* i *from* j.
@@ -102,7 +105,7 @@ class BERT_BILSTM_CRF_KB_NER(nn.Module):
         bert_seq_out, _ = self.bert(input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
                                     output_all_encoded_layers=False)
 
-        new_seq_out = torch.cat((bert_seq_out, self.onto_embed(onto_labels), self.db_embed(db_labels)), 2)
+        new_seq_out = torch.cat((bert_seq_out, self.db_embed(db_labels)), 2)
         new_seq_out = self.dropout(new_seq_out)
 
         rnn_seq_out, _ = self.rnn(new_seq_out)
