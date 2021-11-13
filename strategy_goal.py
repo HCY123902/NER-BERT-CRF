@@ -447,7 +447,7 @@ class Strategy(object):
                 if not os.path.exists(m_path):
                     os.makedirs(m_path)
                 m_name = "NER_BERT_BILSTM_CRF_KB_CLASSIFIER_"+ str(ind_iter+1)+".pt"
-                torch.save({'epoch': epoch, 'model_state': self.model.state_dict(), 'valid_acc': valid_acc,
+                torch.save({'epoch': epoch, 'model_state': self.classifier.state_dict(), 'valid_acc': valid_acc,
                             'valid_f1': valid_f1, 'max_seq_length': max_seq_length, 'lower_case': self.do_lower_case},
                            os.path.join(m_path, m_name))
                 valid_f1_prev = valid_f1
