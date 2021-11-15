@@ -69,6 +69,11 @@ if __name__ == '__main__':
     label_map = conllProcessor.get_label_map()
     print('len_label_list: ', len(label_list))
     print('label_map: ', label_map)
+
+    # Added
+    classifier_train_examples = conllProcessor.get_classifier_train_examples(data_dir)
+    classifier_dev_examples = conllProcessor.get_classifier_dev_examples(data_dir)
+
     all_train_examples = conllProcessor.get_train_examples(data_dir)  # just for # of all training sample
     dev_examples = conllProcessor.get_dev_examples(data_dir)
     test_examples = conllProcessor.get_test_examples(data_dir)
@@ -104,13 +109,14 @@ if __name__ == '__main__':
                                       collate_fn=NerDataset.pad)
 
     # Added
-    classifier_train_dataset = NerDataset(all_train_examples, tokenizer, label_map, max_seq_length)
+    classifier_train_dataset = NerDataset(classifier_train_examples, tokenizer, label_map, max_seq_length)
     classifier_train_dataloader = data.DataLoader(dataset=classifier_train_dataset,
                                        batch_size=args.classifier_batch_size,
                                        shuffle=True,
                                        num_workers=4,
                                        collate_fn=NerDataset.pad)
 
+    classifier_dev_dataset = NerDataset(classifier_dev_examples, tokenizer, label_map, max_seq_length)
     classifier_dev_dataloader = data.DataLoader(dataset=dev_dataset,
                                        batch_size=args.classifier_batch_size,
                                        shuffle=False,
@@ -220,7 +226,7 @@ if __name__ == '__main__':
     for ind_iter in range(args.n_iter):
         # Added
         if ind_iter % 5 == 0:
-            sampler.train_classifier(ind_iter, len(all_train_examples), classifier_train_dataloader, classifier_dev_dataloader, 0, 0, 0, model_path=classifier_model_path, number_of_epochs=2)
+            sampler.train_classifier(ind_iter, len(classifier_train_examples), classifier_train_dataloader, classifier_dev_dataloader, 0, 0, 0, model_path=classifier_model_path, number_of_epochs=2)
 
         # Added for classifier
         classifier_labeled_examples = conllProcessor._create_examples(sampler.labeled_data)

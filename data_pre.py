@@ -169,7 +169,11 @@ class CoNLLDataProcessor(DataProcessor):
 
     def __init__(self, labelToIndex):
         # self._label_types = [ 'X', '[CLS]', '[SEP]', 'O', 'I-LOC', 'B-PER', 'I-PER', 'I-ORG', 'I-MISC', 'B-MISC', 'B-LOC', 'B-ORG']
-        self._label_types = ['X', '[CLS]', '[SEP]', 'O', 'I', 'B']
+        
+        # Adjusted
+        # self._label_types = ['X', '[CLS]', '[SEP]', 'O', 'I', 'B']
+        self._label_types = ['X', '[CLS]', '[SEP]', 'O', 'I_nt', 'B_nt', 'I', 'B']
+
         self._num_labels = len(self._label_types)
         self._label_map = {label: i for i,
                                         label in enumerate(self._label_types)}
@@ -184,12 +188,24 @@ class CoNLLDataProcessor(DataProcessor):
         labeled_data, _ = self._read_data(os.path.join(data_dir, "train.txt"), self.labelToIndex)
         return self._create_examples(labeled_data)
 
+    def get_classifier_train_examples(self, data_dir):
+        labeled_data, _ = self._read_data(os.path.join(data_dir, "train_classifier.txt"), self.labelToIndex)
+        return self._create_examples(labeled_data)
+
     def get_dev_examples(self, data_dir):
         labeled_data, _ = self._read_data(os.path.join(data_dir, "valid.txt"), self.labelToIndex)
         return self._create_examples(labeled_data)
 
+    def get_classifier_dev_examples(self, data_dir):
+        labeled_data, _ = self._read_data(os.path.join(data_dir, "valid_classifier.txt"), self.labelToIndex)
+        return self._create_examples(labeled_data)
+
     def get_test_examples(self, data_dir):
         labeled_data, _ = self._read_data(os.path.join(data_dir, "test.txt"), self.labelToIndex)
+        return self._create_examples(labeled_data)
+
+    def get_classifier_test_examples(self, data_dir):
+        labeled_data, _ = self._read_data(os.path.join(data_dir, "test_classifier.txt"), self.labelToIndex)
         return self._create_examples(labeled_data)
 
     def get_labels(self):

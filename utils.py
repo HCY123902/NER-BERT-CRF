@@ -82,25 +82,72 @@ def spanf1_score(y_true, y_pred):
     true_spans = get_spans(y_true)
     pred_spans = get_spans(y_pred)
 
-    correct = 0
-    for span in pred_spans:
-        if span in true_spans:
-            correct += 1
+    # correct = 0
+    # for span in pred_spans:
+    #     if span in true_spans:
+    #         correct += 1
 
-    if len(pred_spans) == 0:
-        p = 1.0 * correct / 1
+    # if len(pred_spans) == 0:
+    #     p = 1.0 * correct / 1
+    # else:
+    #     p = 1.0 * correct / len(pred_spans)
+    # if len(true_spans) == 0:
+    #     r = 1.0 * correct / 1
+    # else:
+    #     r = 1.0 * correct / len(true_spans)
+
+    # if p + r == 0:
+    #     p = 1
+
+    # f1 = 2.0 * p * r / (p + r)
+
+    nt_true_spans = [span for span in true_spans if span[0][0] == '4' or span[0][0] == '5']
+    nt_pred_spans = [span for span in pred_spans if span[0][0] == '4' or span[0][0] == '5']
+
+    nt_correct = 0
+    for span in nt_pred_spans:
+        if span in nt_true_spans:
+            nt_correct += 1
+
+    if len(nt_pred_spans) == 0:
+        nt_p = 1.0 * nt_correct / 1
     else:
-        p = 1.0 * correct / len(pred_spans)
-    if len(true_spans) == 0:
-        r = 1.0 * correct / 1
+        nt_p = 1.0 * nt_correct / len(nt_pred_spans)
+    if len(nt_true_spans) == 0:
+        nt_r = 1.0 * nt_correct / 1
     else:
-        r = 1.0 * correct / len(true_spans)
+        nt_r = 1.0 * nt_correct / len(nt_true_spans)
 
-    if p + r == 0:
-        p = 1
+    if nt_p + nt_r == 0:
+        nt_p = 1
 
-    f1 = 2.0 * p * r / (p + r)
-    return p, r, f1
+    nt_f1 = 2.0 * nt_p * nt_r / (nt_p + nt_r)
+
+    et_true_spans = [span for span in true_spans if span[0][0] == '6' or span[0][0] == '7']
+    et_pred_spans = [span for span in pred_spans if span[0][0] == '6' or span[0][0] == '7']
+
+    et_correct = 0
+    for span in et_pred_spans:
+        if span in et_true_spans:
+            et_correct += 1
+
+    if len(et_pred_spans) == 0:
+        et_p = 1.0 * et_correct / 1
+    else:
+        et_p = 1.0 * et_correct / len(et_pred_spans)
+    if len(nt_true_spans) == 0:
+        et_r = 1.0 * et_correct / 1
+    else:
+        et_r = 1.0 * et_correct / len(et_true_spans)
+
+    if et_p + et_r == 0:
+        et_p = 1
+
+    et_f1 = 2.0 * et_p * et_r / (et_p + et_r)
+
+    # Adjusted
+    # return p, r, f1
+    return nt_p, nt_r, nt_f1, et_p, et_r, et_f1
 
 def warmup_linear(x, warmup=0.002):
     if x < warmup:
