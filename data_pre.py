@@ -193,7 +193,7 @@ class CoNLLDataProcessor(DataProcessor):
     #     return self._create_examples(labeled_data)
 
     def get_pure_train_examples(self, data_dir):
-        labeled_data, _ = self._read_data(os.path.join(data_dir, "train-pure.txt"), self.labelToIndex)
+        labeled_data, _ = self._read_data(os.path.join(data_dir, "train_pure.txt"), self.labelToIndex)
         return self._create_examples(labeled_data)
 
 
@@ -206,7 +206,7 @@ class CoNLLDataProcessor(DataProcessor):
     #     return self._create_examples(labeled_data)
 
     def get_pure_dev_examples(self, data_dir):
-        labeled_data, _ = self._read_data(os.path.join(data_dir, "valid-pure.txt"), self.labelToIndex)
+        labeled_data, _ = self._read_data(os.path.join(data_dir, "valid_pure.txt"), self.labelToIndex)
         return self._create_examples(labeled_data)
 
 
@@ -219,7 +219,7 @@ class CoNLLDataProcessor(DataProcessor):
     #     return self._create_examples(labeled_data)
 
     def get_pure_test_examples(self, data_dir):
-        labeled_data, _ = self._read_data(os.path.join(data_dir, "test-pure.txt"), self.labelToIndex)
+        labeled_data, _ = self._read_data(os.path.join(data_dir, "test_pure.txt"), self.labelToIndex)
         return self._create_examples(labeled_data)
 
     def get_labels(self):
