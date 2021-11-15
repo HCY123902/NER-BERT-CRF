@@ -50,7 +50,7 @@ class BERT_BILSTM_CRF_KB_NER_CLASSIFIER(nn.Module):
 
         # Maps the output of the bert into label space.
         self.rnn = nn.LSTM(bidirectional=True, num_layers=2, input_size=778, hidden_size=778 // 2, batch_first=True)
-        self.hidden2label = nn.Linear(self.hidden_size + 10, self.num_labels)
+        # self.hidden2label = nn.Linear(self.hidden_size + 10, self.num_labels)
 
         # Matrix of transition parameters.  Entry i,j is the score of transitioning *to* i *from* j.
         self.transitions = nn.Parameter(
@@ -62,8 +62,8 @@ class BERT_BILSTM_CRF_KB_NER_CLASSIFIER(nn.Module):
         self.transitions.data[start_label_id, :] = -10000
         self.transitions.data[:, stop_label_id] = -10000
 
-        nn.init.xavier_uniform_(self.hidden2label.weight)
-        nn.init.constant_(self.hidden2label.bias, 0.0)
+        # nn.init.xavier_uniform_(self.hidden2label.weight)
+        # nn.init.constant_(self.hidden2label.bias, 0.0)
         # self.apply(self.init_bert_weights)
 
         # Added
