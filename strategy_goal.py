@@ -138,7 +138,7 @@ class Strategy(object):
         #     % (epoch_th, 100. * test_acc, 100. * precision, 100. * recall, 100. * f1, 100. * micro, 100. * macro,
         #        100. * spanp, 100. * spanr, 100. * spanf1, dataset_name, (end - start) / 60.0))
         print(
-            'Epoch:%d, Acc:%.2f, Precision: %.2f, Recall: %.2f, F1: %.2f, micro: %.2f, macro: %.2f, nt-span-p: %.2f, nt-span-r: %.2f, nt-spanf1: %.2f on %s, et-span-p: %.2f, et-span-r: %.2f, et-spanf1: %.2f on %s, Spend: %.3f minutes for evaluation' \
+            'Epoch:%d, Acc:%.2f, Precision: %.2f, Recall: %.2f, F1: %.2f, micro: %.2f, macro: %.2f, nt-span-p: %.2f, nt-span-r: %.2f, nt-spanf1: %.2f, et-span-p: %.2f, et-span-r: %.2f, et-spanf1: %.2f on %s, Spend: %.3f minutes for evaluation' \
             % (epoch_th, 100. * test_acc, 100. * precision, 100. * recall, 100. * f1, 100. * micro, 100. * macro,
                100. * nt_spanp, 100. * nt_spanr, 100. * nt_spanf1, 100. * et_spanp, 100. * et_spanr, 100. * et_spanf1, dataset_name, (end - start) / 60.0))
 
