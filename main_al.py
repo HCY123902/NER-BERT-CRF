@@ -140,7 +140,39 @@ if __name__ == '__main__':
     if os.path.exists(model_exact_path):
         pass
     else:
+        # Added
+        pure_train_examples = conllProcessor.get_pure_train_examples(data_dir)  # just for # of all training sample
+        pure_dev_examples = conllProcessor.get_pure_dev_examples(data_dir)
+        pure_test_examples = conllProcessor.get_pure_test_examples(data_dir)
+        #test_examples,_ = conllProcessor.get_train_examples_ratio(data_dir,0.0002)
+        pure_train_dataset = NerDataset(pure_train_examples, tokenizer, label_map, max_seq_length)
+        pure_dev_dataset = NerDataset(pure_dev_examples, tokenizer, label_map, max_seq_length)
+        pure_test_dataset = NerDataset(pure_test_examples, tokenizer, label_map, max_seq_length)
+
+
+        pure_train_dataloader = data.DataLoader(dataset=pure_train_dataset,
+                                       batch_size=args.batch_size,
+                                       shuffle=True,
+                                       num_workers=4,
+                                       collate_fn=NerDataset.pad)
+
+        pure_dev_dataloader = data.DataLoader(dataset=pure_dev_dataset,
+                                     batch_size=args.batch_size,
+                                     shuffle=False,
+                                     num_workers=4,
+                                     collate_fn=NerDataset.pad)
+
+        pure_test_dataloader = data.DataLoader(dataset=pure_test_dataset,
+                                      batch_size=args.batch_size,
+                                      shuffle=False,
+                                      num_workers=4,
+                                      collate_fn=NerDataset.pad)
+
+
         stra = Strategy(args, tagging_model, labeled_data, unlabeled_data,label_map, classifier, labelToIndex=labelToIndex)
+
+        valid_acc_prev, valid_f1_prev = stra.train( -2, 'pure', len(pure_train_examples), pure_train_dataloader, pure_dev_dataloader, pure_test_dataloader, 0, 0, 0, model_path=model_path)
+
         valid_acc_prev, valid_f1_prev = stra.train( -1, run_name, len(labeled_dataset), train_dataloader, dev_dataloader, test_dataloader, 0, 0, 0, model_path=model_path)
         print('time cost: ', (time.time()-start)/3600) 
     # log.flush()

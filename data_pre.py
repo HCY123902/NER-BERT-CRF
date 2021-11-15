@@ -188,24 +188,38 @@ class CoNLLDataProcessor(DataProcessor):
         labeled_data, _ = self._read_data(os.path.join(data_dir, "train.txt"), self.labelToIndex)
         return self._create_examples(labeled_data)
 
-    def get_classifier_train_examples(self, data_dir):
-        labeled_data, _ = self._read_data(os.path.join(data_dir, "train_classifier.txt"), self.labelToIndex)
+    # def get_classifier_train_examples(self, data_dir):
+    #     labeled_data, _ = self._read_data(os.path.join(data_dir, "train_classifier.txt"), self.labelToIndex)
+    #     return self._create_examples(labeled_data)
+
+    def get_pure_train_examples(self, data_dir):
+        labeled_data, _ = self._read_data(os.path.join(data_dir, "train-pure.txt"), self.labelToIndex)
         return self._create_examples(labeled_data)
+
 
     def get_dev_examples(self, data_dir):
         labeled_data, _ = self._read_data(os.path.join(data_dir, "valid.txt"), self.labelToIndex)
         return self._create_examples(labeled_data)
 
-    def get_classifier_dev_examples(self, data_dir):
-        labeled_data, _ = self._read_data(os.path.join(data_dir, "valid_classifier.txt"), self.labelToIndex)
+    # def get_classifier_dev_examples(self, data_dir):
+    #     labeled_data, _ = self._read_data(os.path.join(data_dir, "valid_classifier.txt"), self.labelToIndex)
+    #     return self._create_examples(labeled_data)
+
+    def get_pure_dev_examples(self, data_dir):
+        labeled_data, _ = self._read_data(os.path.join(data_dir, "valid-pure.txt"), self.labelToIndex)
         return self._create_examples(labeled_data)
+
 
     def get_test_examples(self, data_dir):
         labeled_data, _ = self._read_data(os.path.join(data_dir, "test.txt"), self.labelToIndex)
         return self._create_examples(labeled_data)
 
-    def get_classifier_test_examples(self, data_dir):
-        labeled_data, _ = self._read_data(os.path.join(data_dir, "test_classifier.txt"), self.labelToIndex)
+    # def get_classifier_test_examples(self, data_dir):
+    #     labeled_data, _ = self._read_data(os.path.join(data_dir, "test_classifier.txt"), self.labelToIndex)
+    #     return self._create_examples(labeled_data)
+
+    def get_pure_test_examples(self, data_dir):
+        labeled_data, _ = self._read_data(os.path.join(data_dir, "test-pure.txt"), self.labelToIndex)
         return self._create_examples(labeled_data)
 
     def get_labels(self):

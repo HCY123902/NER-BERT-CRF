@@ -149,7 +149,10 @@ class Strategy(object):
               valid_f1_prev, start_epoch, model_path):
 
         ## trainer configuration
-        if run_name in ['all_data', 'init']:
+        if run_name == 'pure':
+            total_train_epochs = self.args.num_epochs
+            warmup_proportion = 0.1
+        elif run_name in ['all_data', 'init']:
             total_train_epochs = self.args.epoch
             warmup_proportion = 0.1
         else:
