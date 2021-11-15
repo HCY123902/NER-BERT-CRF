@@ -53,14 +53,14 @@ class BERT_BILSTM_CRF_KB_NER_CLASSIFIER(nn.Module):
         # self.hidden2label = nn.Linear(self.hidden_size + 10, self.num_labels)
 
         # Matrix of transition parameters.  Entry i,j is the score of transitioning *to* i *from* j.
-        self.transitions = nn.Parameter(
-            torch.randn(self.num_labels, self.num_labels))
+        # self.transitions = nn.Parameter(
+        #     torch.randn(self.num_labels, self.num_labels))
 
         # These two statements enforce the constraint that we never transfer *to* the start tag(or label),
         # and we never transfer *from* the stop label (the model would probably learn this anyway,
         # so this enforcement is likely unimportant)
-        self.transitions.data[start_label_id, :] = -10000
-        self.transitions.data[:, stop_label_id] = -10000
+        # self.transitions.data[start_label_id, :] = -10000
+        # self.transitions.data[:, stop_label_id] = -10000
 
         # nn.init.xavier_uniform_(self.hidden2label.weight)
         # nn.init.constant_(self.hidden2label.bias, 0.0)
