@@ -135,7 +135,7 @@ def spanf1_score(y_true, y_pred):
         et_p = 1.0 * et_correct / 1
     else:
         et_p = 1.0 * et_correct / len(et_pred_spans)
-    if len(nt_true_spans) == 0:
+    if len(et_true_spans) == 0:
         et_r = 1.0 * et_correct / 1
     else:
         et_r = 1.0 * et_correct / len(et_true_spans)

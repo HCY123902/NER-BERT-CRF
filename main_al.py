@@ -168,6 +168,16 @@ if __name__ == '__main__':
                                       num_workers=4,
                                       collate_fn=NerDataset.pad)
 
+        # model_exact_path = os.path.join('checkpoint/'+ method_name, 'pure') + "/NER_BERT_BILSTM_CRF_KB_-1.pt"
+        # checkpoint = torch.load(model_exact_path, map_location='cpu')
+        # start_epoch = checkpoint['epoch'] + 1
+        # valid_acc_prev = checkpoint['valid_acc']
+        # valid_f1_prev = checkpoint['valid_f1']
+        # pretrained_dict = checkpoint['model_state']
+        # net_state_dict = tagging_model.state_dict()
+        # pretrained_dict_selected = {k: v for k, v in pretrained_dict.items() if k in net_state_dict}
+        # net_state_dict.update(pretrained_dict_selected)
+        # tagging_model.load_state_dict(net_state_dict)
 
         stra = Strategy(args, tagging_model, labeled_data, unlabeled_data,label_map, classifier, labelToIndex=labelToIndex)
 
